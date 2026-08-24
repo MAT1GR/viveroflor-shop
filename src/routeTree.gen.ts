@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AccesoriosRouteImport } from './routes/accesorios'
+import { Route as CategoriasRouteImport } from './routes/categorias'
 import { Route as MacetasRouteImport } from './routes/macetas'
 import { Route as PlantasRouteImport } from './routes/plantas'
 import { Route as TiendaRouteImport } from './routes/tienda'
@@ -23,6 +24,11 @@ const IndexRoute = IndexRouteImport.update({
 const AccesoriosRoute = AccesoriosRouteImport.update({
   id: '/accesorios',
   path: '/accesorios',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CategoriasRoute = CategoriasRouteImport.update({
+  id: '/categorias',
+  path: '/categorias',
   getParentRoute: () => rootRouteImport,
 } as any)
 const MacetasRoute = MacetasRouteImport.update({
@@ -44,6 +50,7 @@ const TiendaRoute = TiendaRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/accesorios': typeof AccesoriosRoute
+  '/categorias': typeof CategoriasRoute
   '/macetas': typeof MacetasRoute
   '/plantas': typeof PlantasRoute
   '/tienda': typeof TiendaRoute
@@ -51,6 +58,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/accesorios': typeof AccesoriosRoute
+  '/categorias': typeof CategoriasRoute
   '/macetas': typeof MacetasRoute
   '/plantas': typeof PlantasRoute
   '/tienda': typeof TiendaRoute
@@ -59,21 +67,31 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/accesorios': typeof AccesoriosRoute
+  '/categorias': typeof CategoriasRoute
   '/macetas': typeof MacetasRoute
   '/plantas': typeof PlantasRoute
   '/tienda': typeof TiendaRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/accesorios' | '/macetas' | '/plantas' | '/tienda'
+  fullPaths:
+    '/' | '/accesorios' | '/categorias' | '/macetas' | '/plantas' | '/tienda'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/accesorios' | '/macetas' | '/plantas' | '/tienda'
-  id: '__root__' | '/' | '/accesorios' | '/macetas' | '/plantas' | '/tienda'
+  to: '/' | '/accesorios' | '/categorias' | '/macetas' | '/plantas' | '/tienda'
+  id:
+    | '__root__'
+    | '/'
+    | '/accesorios'
+    | '/categorias'
+    | '/macetas'
+    | '/plantas'
+    | '/tienda'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AccesoriosRoute: typeof AccesoriosRoute
+  CategoriasRoute: typeof CategoriasRoute
   MacetasRoute: typeof MacetasRoute
   PlantasRoute: typeof PlantasRoute
   TiendaRoute: typeof TiendaRoute
@@ -93,6 +111,13 @@ declare module '@tanstack/react-router' {
       path: '/accesorios'
       fullPath: '/accesorios'
       preLoaderRoute: typeof AccesoriosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/categorias': {
+      id: '/categorias'
+      path: '/categorias'
+      fullPath: '/categorias'
+      preLoaderRoute: typeof CategoriasRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/macetas': {
@@ -122,6 +147,7 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AccesoriosRoute: AccesoriosRoute,
+  CategoriasRoute: CategoriasRoute,
   MacetasRoute: MacetasRoute,
   PlantasRoute: PlantasRoute,
   TiendaRoute: TiendaRoute,
