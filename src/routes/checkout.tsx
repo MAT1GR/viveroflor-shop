@@ -10,6 +10,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useCart } from "@/lib/cart";
 import { formatPrice, shippingCostFor, storeConfig } from "@/lib/store-config";
 import { newOrderNumber, saveOrder, type Order, type ShippingMethod } from "@/lib/orders";
+import { saveOrderFn } from "@/lib/orders-server";
 import { createPreference, paymentMethods, type PaymentMethodId } from "@/lib/mercadopago";
 
 export const Route = createFileRoute("/checkout")({
@@ -129,23 +130,33 @@ function CheckoutPage() {
 
     try {
       if (payment !== "efectivo_local") {
-        await createPreference({
-          orderNumber: number,
-          items,
-          shippingCost: shipping,
-          shippingMethod: method,
-          payer: {
-            name: `${order.customer.first_name} ${order.customer.last_name}`,
-            email: order.customer.email,
-            phone: order.customer.phone,
-          },
-          successUrl: `/pedido/${number}`,
-          failureUrl: "/compra-cancelada",
+        const result = await createPreference({
+          data: {
+            orderNumber: number,
+            items,
+            shippingCost: shipping,
+            shippingMethod: method,
+            payer: {
+              name: `${order.customer.first_name} ${order.customer.last_name}`,
+              email: order.customer.email,
+              phone: order.customer.phone,
+            },
+            successUrl: `${window.location.origin}/pedido/${number}`,
+            failureUrl: `${window.location.origin}/compra-cancelada`,
+          }
         });
+        
+        await saveOrderFn({ data: order });
+        clear();
+        
+        // Redirigir a Mercado Pago
+        window.location.href = result.init_point;
+        return; // Detener ejecución aquí, el navegador cambiará de página
+      } else {
+        await saveOrderFn({ data: order });
+        clear();
+        navigate({ to: "/pedido/$number", params: { number } });
       }
-      saveOrder(order);
-      clear();
-      navigate({ to: "/pedido/$number", params: { number } });
     } catch {
       toast.error("No pudimos iniciar el pago", { description: "Intentá nuevamente en unos segundos." });
       navigate({ to: "/compra-cancelada" });

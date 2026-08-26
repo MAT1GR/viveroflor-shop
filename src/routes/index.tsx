@@ -5,7 +5,7 @@ import { SiteShell } from "@/components/site/SiteShell";
 import { ProductCard } from "@/components/site/ProductCard";
 import { categories, products } from "@/lib/catalog";
 import { formatPrice, storeConfig } from "@/lib/store-config";
-import heroImage from "@/assets/cat-interior.jpg";
+
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -65,7 +65,7 @@ function Index() {
           </div>
           <div className="relative">
             <img
-              src={heroImage}
+              src="/assets/cat-interior.jpg"
               alt="Plantas de interior en macetas de cerámica"
               width={1200}
               height={1200}

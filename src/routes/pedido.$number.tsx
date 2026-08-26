@@ -7,7 +7,12 @@ import { loadOrders, statusLabels, type Order } from "@/lib/orders";
 import { paymentMethodLabel, type PaymentMethodId } from "@/lib/mercadopago";
 import { formatPrice, storeConfig, waLink } from "@/lib/store-config";
 
+import { getOrderByNumberFn } from "@/lib/orders-server";
+
 export const Route = createFileRoute("/pedido/$number")({
+  loader: async ({ params }) => {
+    return await getOrderByNumberFn({ data: params.number });
+  },
   head: () => ({
     meta: [
       { title: "Compra confirmada · ViveroFlor" },
@@ -21,14 +26,9 @@ export const Route = createFileRoute("/pedido/$number")({
 });
 
 function OrderPage() {
+  const order = Route.useLoaderData();
   const { number } = Route.useParams();
-  const [order, setOrder] = useState<Order | null>(null);
-  const [ready, setReady] = useState(false);
-
-  useEffect(() => {
-    setOrder(loadOrders().find((o) => o.number === number) ?? null);
-    setReady(true);
-  }, [number]);
+  const ready = true;
 
   return (
     <SiteShell>
@@ -111,7 +111,7 @@ function OrderPage() {
 
           {ready && !order && (
             <p className="mt-6 rounded-xl bg-secondary p-4 text-sm text-muted-foreground">
-              No encontramos el detalle en este dispositivo, pero el pedido {number} quedó registrado.
+              No encontramos el detalle de este pedido.
               Escribinos por WhatsApp y lo revisamos juntos.
             </p>
           )}

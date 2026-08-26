@@ -44,6 +44,9 @@ export const paymentMethods: PaymentMethodOption[] = [
 export const paymentMethodLabel = (id: PaymentMethodId) =>
   paymentMethods.find((m) => m.id === id)?.label ?? "Mercado Pago";
 
+import { createServerFn } from "@tanstack/react-start";
+import { MercadoPagoConfig, Preference } from "mercadopago";
+
 export type PreferenceInput = {
   orderNumber: string;
   items: CartItem[];
@@ -61,14 +64,55 @@ export type PreferenceResult = {
 };
 
 /**
- * Simulación del checkout de Mercado Pago mientras no hay backend.
- * Devuelve la URL de retorno de éxito para continuar el flujo.
+ * Server function to create a Mercado Pago preference
  */
-export async function createPreference(input: PreferenceInput): Promise<PreferenceResult> {
-  await new Promise((r) => setTimeout(r, 900));
-  return {
-    preference_id: `pref-${input.orderNumber}`,
-    init_point: input.successUrl,
-    sandbox: true,
-  };
-}
+export const createPreference = createServerFn({ method: "POST" })
+  .validator((input: PreferenceInput) => input)
+  .handler(async ({ data: input }) => {
+    const token = process.env.MERCADOPAGO_ACCESS_TOKEN;
+    if (!token) {
+      throw new Error("MERCADOPAGO_ACCESS_TOKEN is not defined");
+    }
+
+    const client = new MercadoPagoConfig({ accessToken: token });
+    const preference = new Preference(client);
+
+    try {
+      const result = await preference.create({
+        body: {
+          items: input.items.map((item) => ({
+            id: item.productId,
+            title: item.name,
+            quantity: item.quantity,
+            unit_price: item.price,
+          })),
+          payer: {
+            name: input.payer.name,
+            email: input.payer.email,
+            phone: {
+              number: input.payer.phone,
+            },
+          },
+          shipments: {
+            cost: input.shippingCost,
+          },
+          back_urls: {
+            success: input.successUrl,
+            failure: input.failureUrl,
+            pending: input.successUrl,
+          },
+          auto_return: "approved",
+          external_reference: input.orderNumber,
+        },
+      });
+
+      return {
+        preference_id: result.id!,
+        init_point: process.env.NODE_ENV === "production" ? result.init_point! : result.sandbox_init_point!,
+        sandbox: process.env.NODE_ENV !== "production",
+      };
+    } catch (error) {
+      console.error("Error creating Mercado Pago preference:", error);
+      throw error;
+    }
+  });
