@@ -34,6 +34,8 @@ export type Order = {
   subtotal: number;
   shipping_cost: number;
   total: number;
+  payment_method: string;
+  notes?: string;
   created_at: string;
 };
 
