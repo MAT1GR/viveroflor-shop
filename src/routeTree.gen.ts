@@ -13,9 +13,12 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AccesoriosRouteImport } from './routes/accesorios'
 import { Route as CarritoRouteImport } from './routes/carrito'
 import { Route as CategoriasRouteImport } from './routes/categorias'
+import { Route as CheckoutRouteImport } from './routes/checkout'
+import { Route as CompraCanceladaRouteImport } from './routes/compra-cancelada'
 import { Route as MacetasRouteImport } from './routes/macetas'
 import { Route as PlantasRouteImport } from './routes/plantas'
 import { Route as TiendaRouteImport } from './routes/tienda'
+import { Route as PedidoNumberRouteImport } from './routes/pedido.$number'
 import { Route as ProductoSlugRouteImport } from './routes/producto.$slug'
 
 const IndexRoute = IndexRouteImport.update({
@@ -38,6 +41,16 @@ const CategoriasRoute = CategoriasRouteImport.update({
   path: '/categorias',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CheckoutRoute = CheckoutRouteImport.update({
+  id: '/checkout',
+  path: '/checkout',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CompraCanceladaRoute = CompraCanceladaRouteImport.update({
+  id: '/compra-cancelada',
+  path: '/compra-cancelada',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const MacetasRoute = MacetasRouteImport.update({
   id: '/macetas',
   path: '/macetas',
@@ -53,6 +66,11 @@ const TiendaRoute = TiendaRouteImport.update({
   path: '/tienda',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PedidoNumberRoute = PedidoNumberRouteImport.update({
+  id: '/pedido/$number',
+  path: '/pedido/$number',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ProductoSlugRoute = ProductoSlugRouteImport.update({
   id: '/producto/$slug',
   path: '/producto/$slug',
@@ -64,9 +82,12 @@ export interface FileRoutesByFullPath {
   '/accesorios': typeof AccesoriosRoute
   '/carrito': typeof CarritoRoute
   '/categorias': typeof CategoriasRoute
+  '/checkout': typeof CheckoutRoute
+  '/compra-cancelada': typeof CompraCanceladaRoute
   '/macetas': typeof MacetasRoute
   '/plantas': typeof PlantasRoute
   '/tienda': typeof TiendaRoute
+  '/pedido/$number': typeof PedidoNumberRoute
   '/producto/$slug': typeof ProductoSlugRoute
 }
 export interface FileRoutesByTo {
@@ -74,9 +95,12 @@ export interface FileRoutesByTo {
   '/accesorios': typeof AccesoriosRoute
   '/carrito': typeof CarritoRoute
   '/categorias': typeof CategoriasRoute
+  '/checkout': typeof CheckoutRoute
+  '/compra-cancelada': typeof CompraCanceladaRoute
   '/macetas': typeof MacetasRoute
   '/plantas': typeof PlantasRoute
   '/tienda': typeof TiendaRoute
+  '/pedido/$number': typeof PedidoNumberRoute
   '/producto/$slug': typeof ProductoSlugRoute
 }
 export interface FileRoutesById {
@@ -85,9 +109,12 @@ export interface FileRoutesById {
   '/accesorios': typeof AccesoriosRoute
   '/carrito': typeof CarritoRoute
   '/categorias': typeof CategoriasRoute
+  '/checkout': typeof CheckoutRoute
+  '/compra-cancelada': typeof CompraCanceladaRoute
   '/macetas': typeof MacetasRoute
   '/plantas': typeof PlantasRoute
   '/tienda': typeof TiendaRoute
+  '/pedido/$number': typeof PedidoNumberRoute
   '/producto/$slug': typeof ProductoSlugRoute
 }
 export interface FileRouteTypes {
@@ -97,9 +124,12 @@ export interface FileRouteTypes {
     | '/accesorios'
     | '/carrito'
     | '/categorias'
+    | '/checkout'
+    | '/compra-cancelada'
     | '/macetas'
     | '/plantas'
     | '/tienda'
+    | '/pedido/$number'
     | '/producto/$slug'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -107,9 +137,12 @@ export interface FileRouteTypes {
     | '/accesorios'
     | '/carrito'
     | '/categorias'
+    | '/checkout'
+    | '/compra-cancelada'
     | '/macetas'
     | '/plantas'
     | '/tienda'
+    | '/pedido/$number'
     | '/producto/$slug'
   id:
     | '__root__'
@@ -117,9 +150,12 @@ export interface FileRouteTypes {
     | '/accesorios'
     | '/carrito'
     | '/categorias'
+    | '/checkout'
+    | '/compra-cancelada'
     | '/macetas'
     | '/plantas'
     | '/tienda'
+    | '/pedido/$number'
     | '/producto/$slug'
   fileRoutesById: FileRoutesById
 }
@@ -128,9 +164,12 @@ export interface RootRouteChildren {
   AccesoriosRoute: typeof AccesoriosRoute
   CarritoRoute: typeof CarritoRoute
   CategoriasRoute: typeof CategoriasRoute
+  CheckoutRoute: typeof CheckoutRoute
+  CompraCanceladaRoute: typeof CompraCanceladaRoute
   MacetasRoute: typeof MacetasRoute
   PlantasRoute: typeof PlantasRoute
   TiendaRoute: typeof TiendaRoute
+  PedidoNumberRoute: typeof PedidoNumberRoute
   ProductoSlugRoute: typeof ProductoSlugRoute
 }
 
@@ -164,6 +203,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CategoriasRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/checkout': {
+      id: '/checkout'
+      path: '/checkout'
+      fullPath: '/checkout'
+      preLoaderRoute: typeof CheckoutRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/compra-cancelada': {
+      id: '/compra-cancelada'
+      path: '/compra-cancelada'
+      fullPath: '/compra-cancelada'
+      preLoaderRoute: typeof CompraCanceladaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/macetas': {
       id: '/macetas'
       path: '/macetas'
@@ -185,6 +238,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TiendaRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/pedido/$number': {
+      id: '/pedido/$number'
+      path: '/pedido/$number'
+      fullPath: '/pedido/$number'
+      preLoaderRoute: typeof PedidoNumberRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/producto/$slug': {
       id: '/producto/$slug'
       path: '/producto/$slug'
@@ -200,9 +260,12 @@ const rootRouteChildren: RootRouteChildren = {
   AccesoriosRoute: AccesoriosRoute,
   CarritoRoute: CarritoRoute,
   CategoriasRoute: CategoriasRoute,
+  CheckoutRoute: CheckoutRoute,
+  CompraCanceladaRoute: CompraCanceladaRoute,
   MacetasRoute: MacetasRoute,
   PlantasRoute: PlantasRoute,
   TiendaRoute: TiendaRoute,
+  PedidoNumberRoute: PedidoNumberRoute,
   ProductoSlugRoute: ProductoSlugRoute,
 }
 export const routeTree = rootRouteImport
