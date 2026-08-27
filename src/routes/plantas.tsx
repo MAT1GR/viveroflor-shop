@@ -1,9 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { SiteShell, PageHeader } from "@/components/site/SiteShell";
 import { ShopView } from "@/components/site/ShopView";
-import { products } from "@/lib/catalog";
+import { getProductsFn } from "@/lib/catalog-server";
 
 export const Route = createFileRoute("/plantas")({
+  loader: () => getProductsFn(),
   head: () => ({
     meta: [
       { title: "Plantas de interior y exterior · ViveroFlor" },
@@ -19,7 +20,8 @@ export const Route = createFileRoute("/plantas")({
 });
 
 function Plantas() {
-  const source = products.filter(
+  const allProducts = Route.useLoaderData();
+  const source = allProducts.filter(
     (p) => p.active && ["plantas", "interior", "exterior"].includes(p.category_id),
   );
   return (

@@ -51,3 +51,13 @@ export const updateOrderStatusFn = createServerFn({ method: "POST" })
     });
     return { success: true };
   });
+
+export const updateOrderPaymentStatusFn = createServerFn({ method: "POST" })
+  .validator((data: { id: string; payment_status: string; status: OrderStatus }) => data)
+  .handler(async ({ data }) => {
+    await db.execute({
+      sql: "UPDATE orders SET payment_status = ?, status = ?, updated_at = ? WHERE id = ?",
+      args: [data.payment_status, data.status, new Date().toISOString(), data.id]
+    });
+    return { success: true };
+  });

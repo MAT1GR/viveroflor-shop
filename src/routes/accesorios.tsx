@@ -1,8 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { SiteShell, PageHeader } from "@/components/site/SiteShell";
 import { ShopView } from "@/components/site/ShopView";
+import { getProductsFn } from "@/lib/catalog-server";
 
 export const Route = createFileRoute("/accesorios")({
+  loader: () => getProductsFn(),
   head: () => ({
     meta: [
       { title: "Accesorios de jardinería · ViveroFlor" },
@@ -18,6 +20,7 @@ export const Route = createFileRoute("/accesorios")({
 });
 
 function Accesorios() {
+  const allProducts = Route.useLoaderData();
   return (
     <SiteShell>
       <PageHeader
@@ -25,7 +28,7 @@ function Accesorios() {
         title="Accesorios"
         subtitle="Todo lo que necesitás para trasplantar, regar y mantener tus plantas."
       />
-      <ShopView fixedCategory="accesorios" />
+      <ShopView fixedCategory="accesorios" source={allProducts} />
     </SiteShell>
   );
 }

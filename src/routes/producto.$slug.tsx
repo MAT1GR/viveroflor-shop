@@ -5,14 +5,22 @@ import { SiteShell } from "@/components/site/SiteShell";
 import { ProductCard } from "@/components/site/ProductCard";
 import { Button } from "@/components/ui/button";
 import { useCart } from "@/lib/cart";
-import { categoryName, discountPercent, getProduct, relatedProducts } from "@/lib/catalog";
+import { categoryName, discountPercent } from "@/lib/catalog";
 import { formatPrice, storeConfig, waLink } from "@/lib/store-config";
+import { getProductBySlugFn, getProductsFn } from "@/lib/catalog-server";
 
 export const Route = createFileRoute("/producto/$slug")({
-  loader: ({ params }) => {
-    const product = getProduct(params.slug);
+  loader: async ({ params }) => {
+    const product = await getProductBySlugFn({ data: params.slug });
     if (!product) throw notFound();
-    return { product };
+    
+    const allProducts = await getProductsFn();
+    const related = allProducts
+      .filter((x) => x.active && x.id !== product.id)
+      .sort((a, b) => Number(b.category_id === product.category_id) - Number(a.category_id === product.category_id))
+      .slice(0, 4);
+
+    return { product, related };
   },
   head: ({ loaderData }) => {
     if (!loaderData) {
@@ -34,7 +42,7 @@ export const Route = createFileRoute("/producto/$slug")({
 });
 
 function ProductPage() {
-  const { product } = Route.useLoaderData();
+  const { product, related } = Route.useLoaderData();
   const { add, openCart } = useCart();
   const [qty, setQty] = useState(1);
   const [active, setActive] = useState(0);
@@ -181,7 +189,7 @@ function ProductPage() {
         <section className="mt-14">
           <h2 className="font-display text-2xl font-semibold">También te puede gustar</h2>
           <div className="mt-5 grid grid-cols-2 gap-4 lg:grid-cols-4">
-            {relatedProducts(product).map((p) => (
+            {related.map((p) => (
               <ProductCard key={p.id} product={p} />
             ))}
           </div>

@@ -3,11 +3,12 @@ import { ArrowRight, Leaf, Truck, ShieldCheck, Store } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { SiteShell } from "@/components/site/SiteShell";
 import { ProductCard } from "@/components/site/ProductCard";
-import { categories, products } from "@/lib/catalog";
+import { categories } from "@/lib/catalog";
 import { formatPrice, storeConfig } from "@/lib/store-config";
-
+import { getProductsFn } from "@/lib/catalog-server";
 
 export const Route = createFileRoute("/")({
+  loader: () => getProductsFn(),
   head: () => ({
     meta: [
       { title: "ViveroFlor · Plantas y macetas en Rosario" },
@@ -34,8 +35,9 @@ const benefits = [
 ];
 
 function Index() {
-  const featured = products.filter((p) => p.featured && p.active).slice(0, 4);
-  const offers = products.filter((p) => p.compare_price && p.compare_price > p.price).slice(0, 3);
+  const allProducts = Route.useLoaderData();
+  const featured = allProducts.filter((p) => p.featured && p.active).slice(0, 4);
+  const offers = allProducts.filter((p) => p.compare_price && p.compare_price > p.price).slice(0, 3);
 
   return (
     <SiteShell>

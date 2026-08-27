@@ -1,8 +1,10 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { SiteShell, PageHeader } from "@/components/site/SiteShell";
-import { categories, products } from "@/lib/catalog";
+import { categories } from "@/lib/catalog";
+import { getProductsFn } from "@/lib/catalog-server";
 
 export const Route = createFileRoute("/categorias")({
+  loader: () => getProductsFn(),
   head: () => ({
     meta: [
       { title: "Categorías · ViveroFlor" },
@@ -18,12 +20,13 @@ export const Route = createFileRoute("/categorias")({
 });
 
 function Categorias() {
+  const allProducts = Route.useLoaderData();
   return (
     <SiteShell>
       <PageHeader eyebrow="Explorar" title="Categorías" subtitle="Elegí por dónde empezar." />
       <div className="container-page grid gap-6 py-12 sm:grid-cols-2 lg:grid-cols-3">
         {categories.map((c) => {
-          const count = products.filter((p) => p.active && p.category_id === c.id).length;
+          const count = allProducts.filter((p) => p.active && p.category_id === c.id).length;
           return (
             <Link
               key={c.id}

@@ -7,11 +7,31 @@ import { loadOrders, statusLabels, type Order } from "@/lib/orders";
 import { paymentMethodLabel, type PaymentMethodId } from "@/lib/mercadopago";
 import { formatPrice, storeConfig, waLink } from "@/lib/store-config";
 
-import { getOrderByNumberFn } from "@/lib/orders-server";
+import { getOrderByNumberFn, updateOrderPaymentStatusFn } from "@/lib/orders-server";
+
+type Search = {
+  collection_status?: string;
+  status?: string;
+};
 
 export const Route = createFileRoute("/pedido/$number")({
-  loader: async ({ params }) => {
-    return await getOrderByNumberFn({ data: params.number });
+  validateSearch: (search: Record<string, unknown>): Search => ({
+    collection_status: typeof search.collection_status === "string" ? search.collection_status : undefined,
+    status: typeof search.status === "string" ? search.status : undefined,
+  }),
+  loaderDeps: ({ search }) => search,
+  loader: async ({ params, deps }) => {
+    let order = await getOrderByNumberFn({ data: params.number });
+    if (!order) return null;
+    
+    const isApproved = deps?.collection_status === "approved" || deps?.status === "approved";
+    if (isApproved && order.payment_status === "pendiente") {
+      await updateOrderPaymentStatusFn({ data: { id: order.id, payment_status: "aprobado", status: "pagado" } });
+      order.payment_status = "aprobado";
+      order.status = "pagado";
+    }
+    
+    return order;
   },
   head: () => ({
     meta: [

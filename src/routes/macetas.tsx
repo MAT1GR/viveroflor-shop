@@ -1,8 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { SiteShell, PageHeader } from "@/components/site/SiteShell";
 import { ShopView } from "@/components/site/ShopView";
+import { getProductsFn } from "@/lib/catalog-server";
 
 export const Route = createFileRoute("/macetas")({
+  loader: () => getProductsFn(),
   head: () => ({
     meta: [
       { title: "Macetas de cerámica y terracota · ViveroFlor" },
@@ -18,6 +20,7 @@ export const Route = createFileRoute("/macetas")({
 });
 
 function Macetas() {
+  const allProducts = Route.useLoaderData();
   return (
     <SiteShell>
       <PageHeader
@@ -25,7 +28,7 @@ function Macetas() {
         title="Macetas"
         subtitle="Cerámica esmaltada, terracota natural y sets para combinar."
       />
-      <ShopView fixedCategory="macetas" />
+      <ShopView fixedCategory="macetas" source={allProducts} />
     </SiteShell>
   );
 }

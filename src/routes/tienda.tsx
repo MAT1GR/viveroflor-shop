@@ -1,10 +1,12 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { SiteShell, PageHeader } from "@/components/site/SiteShell";
 import { ShopView } from "@/components/site/ShopView";
+import { getProductsFn } from "@/lib/catalog-server";
 
 type Search = { q?: string };
 
 export const Route = createFileRoute("/tienda")({
+  loader: () => getProductsFn(),
   validateSearch: (search: Record<string, unknown>): Search => ({
     q: typeof search.q === "string" && search.q ? search.q : undefined,
   }),
@@ -24,6 +26,7 @@ export const Route = createFileRoute("/tienda")({
 
 function Tienda() {
   const { q } = Route.useSearch();
+  const allProducts = Route.useLoaderData();
   return (
     <SiteShell>
       <PageHeader
@@ -31,7 +34,7 @@ function Tienda() {
         title="Tienda"
         subtitle="Filtrá por categoría, precio y disponibilidad para encontrar tu próxima planta."
       />
-      <ShopView key={q ?? ""} initialQuery={q ?? ""} />
+      <ShopView key={q ?? ""} initialQuery={q ?? ""} source={allProducts} />
     </SiteShell>
   );
 }

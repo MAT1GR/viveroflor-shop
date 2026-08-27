@@ -100,8 +100,8 @@ function CheckoutPage() {
     const order: Order = {
       id: crypto.randomUUID(),
       number,
-      status: payment === "efectivo_local" ? "pendiente" : "pagado",
-      payment_status: payment === "efectivo_local" ? "pendiente" : "aprobado",
+      status: "pendiente",
+      payment_status: "pendiente",
       customer: {
         first_name: form.first_name.trim(),
         last_name: form.last_name.trim(),

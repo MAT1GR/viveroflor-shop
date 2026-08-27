@@ -70,8 +70,9 @@ export const createPreference = createServerFn({ method: "POST" })
   .validator((input: PreferenceInput) => input)
   .handler(async ({ data: input }) => {
     const token = process.env.MERCADOPAGO_ACCESS_TOKEN;
-    if (!token) {
-      throw new Error("MERCADOPAGO_ACCESS_TOKEN is not defined");
+    
+    if (!token || token === "APP_USR-xxxxxxxxx-xxxx-xxxx-xxxxxxxxxxxx") {
+      throw new Error("MERCADOPAGO_ACCESS_TOKEN no configurado correctamente. Por favor ingresa tu token real en el archivo .env");
     }
 
     const client = new MercadoPagoConfig({ accessToken: token });
