@@ -12,4 +12,7 @@ export default defineConfig({
     // nitro/vite builds from this
     server: { entry: "server" },
   },
+  // En Vercel (VERCEL=1 durante el build) generamos .vercel/output con una función Node.
+  // Fuera de Vercel se mantiene el default de Lovable (Cloudflare).
+  ...(process.env["VERCEL"] ? { nitro: { preset: "vercel" } } : {}),
 });

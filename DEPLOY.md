@@ -74,7 +74,18 @@ Es una variable de **build**: hay que rebuildear si cambia.
 
 ---
 
-## 5. Deploy
+## 5. Deploy en Vercel (recomendado)
+
+1. Importar el repo en <https://vercel.com/new>. `vercel.json` ya fija el install
+   (`npm install`) y el build (`npm run build`); no hay que tocar "Build settings".
+2. En **Settings → Environment Variables** cargar `TURSO_URL`, `TURSO_AUTH_TOKEN`,
+   `ADMIN_USER`, `ADMIN_PASSWORD`, `ADMIN_SESSION_SECRET` y `VITE_SITE_URL`.
+3. Deploy. Si cambiás alguna variable, hacé **Redeploy** para que tome efecto.
+
+Durante el build Vercel define `VERCEL=1` y `vite.config.ts` genera `.vercel/output`
+(función Node). Sin `TURSO_URL` el sitio levanta pero toda consulta a la base falla.
+
+## 5b. Deploy en Cloudflare
 
 ```bash
 npm run build

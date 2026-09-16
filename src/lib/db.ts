@@ -3,6 +3,11 @@ import { createClient, type Transaction } from "@libsql/client";
 const url = process.env["TURSO_URL"] || "file:local.db";
 const authToken = process.env["TURSO_AUTH_TOKEN"];
 
+if (!process.env["TURSO_URL"] && (process.env["VERCEL"] || process.env["NODE_ENV"] === "production")) {
+  // En Vercel/Cloudflare el disco es de solo lectura: local.db no existe y todas las consultas fallan.
+  console.error("[db] Falta TURSO_URL: configurá TURSO_URL y TURSO_AUTH_TOKEN en el entorno de producción.");
+}
+
 export const db = createClient(authToken ? { url, authToken } : { url });
 
 // Función para inicializar las tablas si no existen
