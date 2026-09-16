@@ -1,4 +1,14 @@
-import { createClient, type Transaction } from "@libsql/client";
+import type { Transaction } from "@libsql/client";
+import { createClient as createWebClient } from "@libsql/client/web";
+
+// Con Turso usamos el cliente web (HTTP puro). El cliente Node carga un binario nativo
+// (`@libsql/<plataforma>`) apenas se importa, y en Vercel ese binario no queda en la
+// función: el server entero tira 500. El cliente Node sólo hace falta para `file:local.db`
+// en desarrollo, así que se importa con un specifier dinámico para que no entre al bundle.
+const nodeClientModule = "@libsql/client";
+const createClient: typeof createWebClient = process.env["TURSO_URL"]
+  ? createWebClient
+  : (await import(/* @vite-ignore */ nodeClientModule)).createClient;
 
 const url = process.env["TURSO_URL"] || "file:local.db";
 const authToken = process.env["TURSO_AUTH_TOKEN"];
