@@ -72,7 +72,9 @@ export function ProductCard({ product }: { product: Product }) {
           {outOfStock
             ? "No disponible por ahora"
             : product.stock <= 5
-              ? `Últimas ${product.stock} unidades`
+              ? product.stock === 1
+                ? "¡Última unidad!"
+                : `Últimas ${product.stock} unidades`
               : "Disponible"}
         </p>
 

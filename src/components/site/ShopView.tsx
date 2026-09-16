@@ -137,8 +137,7 @@ export function ShopView({
     list = [...list];
     if (sort === "precio-asc") list.sort((a, b) => a.price - b.price);
     if (sort === "precio-desc") list.sort((a, b) => b.price - a.price);
-    if (sort === "nuevos")
-      list.sort((a, b) => +new Date(b.created_at) - +new Date(a.created_at));
+    if (sort === "nuevos") list.sort((a, b) => +new Date(b.created_at) - +new Date(a.created_at));
     if (sort === "relevancia") list.sort((a, b) => b.sold - a.sold);
     return list;
   }, [source, query, cats, maxPrice, onlyStock, onlyOffers, sort, fixedCategory]);

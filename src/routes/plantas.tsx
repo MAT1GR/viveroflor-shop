@@ -10,10 +10,14 @@ export const Route = createFileRoute("/plantas")({
       { title: "Plantas de interior y exterior · ViveroFlor" },
       {
         name: "description",
-        content: "Monstera, ficus, potus, suculentas y más. Plantas sanas listas para tu casa en Rosario.",
+        content:
+          "Monstera, ficus, potus, suculentas y más. Plantas sanas listas para tu casa en Rosario.",
       },
       { property: "og:title", content: "Plantas · ViveroFlor" },
-      { property: "og:description", content: "Plantas de interior y exterior seleccionadas una por una." },
+      {
+        property: "og:description",
+        content: "Plantas de interior y exterior seleccionadas una por una.",
+      },
     ],
   }),
   component: Plantas,

@@ -3,15 +3,27 @@ import { ArrowRight, Minus, Plus, ShoppingBag, Trash2 } from "lucide-react";
 import { SiteShell, PageHeader } from "@/components/site/SiteShell";
 import { Button } from "@/components/ui/button";
 import { useCart } from "@/lib/cart";
-import { formatPrice, shippingCostFor, storeConfig } from "@/lib/store-config";
+import {
+  canDeliver,
+  formatPrice,
+  missingForDelivery,
+  shippingCostFor,
+  storeConfig,
+} from "@/lib/store-config";
 
 export const Route = createFileRoute("/carrito")({
   head: () => ({
     meta: [
       { title: "Tu carrito · ViveroFlor" },
-      { name: "description", content: "Revisá tus plantas, macetas y accesorios antes de finalizar la compra." },
+      {
+        name: "description",
+        content: "Revisá tus plantas, macetas y accesorios antes de finalizar la compra.",
+      },
       { property: "og:title", content: "Tu carrito · ViveroFlor" },
-      { property: "og:description", content: "Revisá tu pedido y elegí envío en Rosario o retiro por el local." },
+      {
+        property: "og:description",
+        content: "Revisá tu pedido y elegí envío en Rosario o retiro por el local.",
+      },
     ],
   }),
   component: CartPage,
@@ -20,14 +32,19 @@ export const Route = createFileRoute("/carrito")({
 function CartPage() {
   const { items, subtotal, setQuantity, remove, count } = useCart();
   const shipping = shippingCostFor(subtotal, "delivery");
-  const falta = Math.max(0, storeConfig.shipping.freeFrom - subtotal);
+  const deliveryAvailable = canDeliver(subtotal);
+  const falta = missingForDelivery(subtotal);
 
   return (
     <SiteShell>
       <PageHeader
         eyebrow="Paso 1 de 3"
         title="Tu carrito"
-        subtitle={count > 0 ? `${count} producto${count === 1 ? "" : "s"} listos para el siguiente paso.` : undefined}
+        subtitle={
+          count > 0
+            ? `${count} producto${count === 1 ? "" : "s"} listos para el siguiente paso.`
+            : undefined
+        }
       />
 
       <div className="container-page py-10">
@@ -99,7 +116,9 @@ function CartPage() {
                           <Plus className="size-4" />
                         </button>
                       </div>
-                      <span className="font-semibold">{formatPrice(item.price * item.quantity)}</span>
+                      <span className="font-semibold">
+                        {formatPrice(item.price * item.quantity)}
+                      </span>
                     </div>
                   </div>
                 </li>
@@ -115,7 +134,11 @@ function CartPage() {
                 </div>
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Envío en Rosario</span>
-                  <span className="font-medium">{shipping === 0 ? "Gratis" : formatPrice(shipping)}</span>
+                  <span className="font-medium">
+                    {deliveryAvailable
+                      ? formatPrice(shipping)
+                      : `Desde ${formatPrice(storeConfig.shipping.minOrderForDelivery)}`}
+                  </span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Retiro por el local</span>
@@ -124,7 +147,8 @@ function CartPage() {
               </div>
               {falta > 0 && (
                 <p className="mt-3 rounded-xl bg-secondary p-3 text-xs text-foreground">
-                  Te faltan {formatPrice(falta)} para tener el envío sin cargo.
+                  Te faltan {formatPrice(falta)} para llegar a la compra mínima de envío. Podés
+                  retirar por el local sin costo.
                 </p>
               )}
               <div className="mt-4 flex justify-between border-t border-border pt-3 text-base font-semibold">

@@ -1,4 +1,4 @@
-import { initDb } from "./src/lib/db";
+import { initDb } from "./src/lib/db.ts";
 
 async function run() {
   console.log("Inicializando base de datos...");

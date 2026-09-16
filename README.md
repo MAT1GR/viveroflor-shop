@@ -24,7 +24,7 @@ El objetivo principal es que una persona pueda:
 
 8. Elegir retiro por el local o envío.
 
-9. Realizar el pago mediante Mercado Pago.
+9. Confirmar el pedido por WhatsApp, donde se coordina el pago.
 
 10. Recibir una confirmación del pedido.
 
@@ -40,35 +40,35 @@ Rubro: vivero, plantas, macetas, decoración y productos para el hogar.
 
 Estética:
 
-* Natural
+- Natural
 
-* Moderna
+- Moderna
 
-* Cálida
+- Cálida
 
-* Premium pero accesible
+- Premium pero accesible
 
-* Minimalista
+- Minimalista
 
-* Fresca
+- Fresca
 
-* Visualmente atractiva
+- Visualmente atractiva
 
-* Nada de estética excesivamente rústica o "gauchesca"
+- Nada de estética excesivamente rústica o "gauchesca"
 
 Utilizar una paleta inspirada en naturaleza:
 
-* Verde oscuro para elementos principales.
+- Verde oscuro para elementos principales.
 
-* Verde salvia.
+- Verde salvia.
 
-* Blanco cálido / crema para fondos.
+- Blanco cálido / crema para fondos.
 
-* Beige claro.
+- Beige claro.
 
-* Gris oscuro para textos.
+- Gris oscuro para textos.
 
-* Verde claro como color secundario.
+- Verde claro como color secundario.
 
 Evitar colores demasiado saturados.
 
@@ -84,27 +84,27 @@ Las imágenes de productos deben tener mucho protagonismo.
 
 Crear las siguientes páginas:
 
-* Inicio
+- Inicio
 
-* Tienda
+- Tienda
 
-* Categorías
+- Categorías
 
-* Producto
+- Producto
 
-* Carrito
+- Carrito
 
-* Checkout
+- Checkout
 
-* Página de compra exitosa
+- Página de compra exitosa
 
-* Página de compra cancelada
+- Página de compra cancelada
 
-* Página de contacto
+- Página de contacto
 
-* Preguntas frecuentes
+- Preguntas frecuentes
 
-* Sobre nosotros
+- Sobre nosotros
 
 ---
 
@@ -116,25 +116,25 @@ Logo ViveroFlor a la izquierda.
 
 Centro:
 
-* Inicio
+- Inicio
 
-* Tienda
+- Tienda
 
-* Plantas
+- Plantas
 
-* Macetas
+- Macetas
 
-* Accesorios
+- Accesorios
 
-* Nosotros
+- Nosotros
 
 Derecha:
 
-* Buscador
+- Buscador
 
-* Cuenta
+- Cuenta
 
-* Carrito
+- Carrito
 
 Mobile:
 
@@ -210,29 +210,29 @@ Mostrar una grilla de productos.
 
 Cada tarjeta debe incluir:
 
-* Imagen
+- Imagen
 
-* Categoría
+- Categoría
 
-* Nombre
+- Nombre
 
-* Precio
+- Precio
 
-* Precio anterior si existe
+- Precio anterior si existe
 
-* Descuento si corresponde
+- Descuento si corresponde
 
-* Estado de stock
+- Estado de stock
 
-* Botón "Agregar al carrito"
+- Botón "Agregar al carrito"
 
 Al pasar el mouse:
 
-* Pequeña animación.
+- Pequeña animación.
 
-* Imagen ligeramente ampliada.
+- Imagen ligeramente ampliada.
 
-* Botón de compra visible.
+- Botón de compra visible.
 
 En mobile mantener la experiencia simple y rápida.
 
@@ -288,29 +288,29 @@ Header de tienda:
 
 Agregar:
 
-* Buscador
+- Buscador
 
-* Ordenar por
+- Ordenar por
 
-* Filtros
+- Filtros
 
-* Categorías
+- Categorías
 
-* Rango de precios
+- Rango de precios
 
-* Disponibilidad
+- Disponibilidad
 
 Ordenamiento:
 
-* Relevancia
+- Relevancia
 
-* Más vendidos
+- Más vendidos
 
-* Precio menor a mayor
+- Precio menor a mayor
 
-* Precio mayor a menor
+- Precio mayor a menor
 
-* Más nuevos
+- Más nuevos
 
 Filtros en desktop mediante sidebar.
 
@@ -332,11 +332,11 @@ Imagen grande.
 
 Badge opcional:
 
-* NUEVO
+- NUEVO
 
-* OFERTA
+- OFERTA
 
-* MÁS VENDIDO
+- MÁS VENDIDO
 
 Nombre.
 
@@ -366,29 +366,29 @@ Galería de imágenes a la izquierda.
 
 Información a la derecha:
 
-* Nombre
+- Nombre
 
-* Categoría
+- Categoría
 
-* Precio
+- Precio
 
-* Precio anterior
+- Precio anterior
 
-* Descuento
+- Descuento
 
-* Disponibilidad
+- Disponibilidad
 
-* Descripción
+- Descripción
 
-* Características
+- Características
 
-* Tamaño
+- Tamaño
 
-* Cuidados cuando corresponda
+- Cuidados cuando corresponda
 
-* Cantidad
+- Cantidad
 
-* Botón grande "Agregar al carrito"
+- Botón grande "Agregar al carrito"
 
 Agregar:
 
@@ -418,19 +418,19 @@ Crear un carrito lateral tipo drawer y una página completa de carrito.
 
 Cada producto:
 
-* Imagen
+- Imagen
 
-* Nombre
+- Nombre
 
-* Precio
+- Precio
 
-* Cantidad
+- Cantidad
 
-* Controles +/-
+- Controles +/-
 
-* Subtotal
+- Subtotal
 
-* Eliminar
+- Eliminar
 
 Mostrar:
 
@@ -464,13 +464,13 @@ Dividir visualmente en:
 
 ## Datos del cliente
 
-* Nombre
+- Nombre
 
-* Apellido
+- Apellido
 
-* Email
+- Email
 
-* Teléfono
+- Teléfono
 
 ## Entrega
 
@@ -484,25 +484,25 @@ Gratis
 
 Ingresar:
 
-* Dirección
+- Dirección
 
-* Número
+- Número
 
-* Piso/departamento opcional
+- Piso/departamento opcional
 
-* Barrio
+- Barrio
 
-* Ciudad
+- Ciudad
 
 Mostrar costo de envío cuando corresponda.
 
 ## Pago
 
-Preparar la estructura para integración con **Mercado Pago**.
+No hay cobro online: el pedido se cierra por **WhatsApp**.
 
 El flujo debe quedar preparado para:
 
-Checkout → Mercado Pago → retorno a la tienda → página de éxito.
+Checkout → se registra el pedido (descuenta stock) → se abre WhatsApp con el detalle completo → página del pedido.
 
 ---
 
@@ -522,15 +522,15 @@ Texto:
 
 Mostrar:
 
-* Número de pedido
+- Número de pedido
 
-* Resumen
+- Resumen
 
-* Total
+- Total
 
-* Método de entrega
+- Método de entrega
 
-* Estado
+- Estado
 
 Botón:
 
@@ -572,81 +572,81 @@ Debe permitir:
 
 Mostrar:
 
-* Ventas del día
+- Ventas del día
 
-* Ventas del mes
+- Ventas del mes
 
-* Pedidos
+- Pedidos
 
-* Productos
+- Productos
 
-* Ticket promedio
+- Ticket promedio
 
 Agregar gráficos simples:
 
-* Ventas por día
+- Ventas por día
 
-* Pedidos por estado
+- Pedidos por estado
 
-* Productos más vendidos
+- Productos más vendidos
 
 ## Productos
 
 CRUD completo:
 
-* Crear
+- Crear
 
-* Editar
+- Editar
 
-* Eliminar
+- Eliminar
 
-* Activar/desactivar
+- Activar/desactivar
 
-* Precio
+- Precio
 
-* Precio anterior
+- Precio anterior
 
-* Stock
+- Stock
 
-* Categoría
+- Categoría
 
-* Imágenes
+- Imágenes
 
-* Descripción
+- Descripción
 
-* Características
+- Características
 
 ## Pedidos
 
 Tabla:
 
-* Nº pedido
+- Nº pedido
 
-* Cliente
+- Cliente
 
-* Fecha
+- Fecha
 
-* Total
+- Total
 
-* Método de entrega
+- Método de entrega
 
-* Estado
+- Estado
 
 Estados:
 
-* Pendiente
+- Pendiente
 
-* Pagado
+- Pagado
 
-* Preparando
+- Preparando
 
-* Listo
+- Listo
 
-* Enviado
+- Enviado
 
-* Entregado
+- Entregado
 
-* Cancelado
+- Cancelado
 
 Permitir abrir un pedido y ver todos sus detalles.
 
@@ -658,19 +658,19 @@ CRUD de categorías.
 
 Permitir configurar:
 
-* Nombre del negocio
+- Nombre del negocio
 
-* Logo
+- Logo
 
-* Datos de contacto
+- Datos de contacto
 
-* Dirección
+- Dirección
 
-* Horarios
+- Horarios
 
-* Métodos de entrega
+- Métodos de entrega
 
-* Costos de envío
+- Costos de envío
 
 ---
 
@@ -704,51 +704,51 @@ store_settings
 
 Cada producto debe tener:
 
-* id
+- id
 
-* name
+- name
 
-* slug
+- slug
 
-* description
+- description
 
-* price
+- price
 
-* compare_price
+- compare_price
 
-* stock
+- stock
 
-* category_id
+- category_id
 
-* active
+- active
 
-* featured
+- featured
 
-* created_at
+- created_at
 
-* updated_at
+- updated_at
 
 Cada pedido debe tener:
 
-* id
+- id
 
-* customer_id
+- customer_id
 
-* status
+- status
 
-* payment_status
+- payment_status
 
-* subtotal
+- subtotal
 
-* shipping_cost
+- shipping_cost
 
-* total
+- total
 
-* shipping_method
+- shipping_method
 
-* shipping_address
+- shipping_address
 
-* created_at
+- created_at
 
 ---
 
@@ -762,21 +762,21 @@ Mobile-first.
 
 Priorizar:
 
-* Velocidad
+- Velocidad
 
-* Botones grandes
+- Botones grandes
 
-* Navegación sencilla
+- Navegación sencilla
 
-* Imágenes optimizadas
+- Imágenes optimizadas
 
-* Checkout corto
+- Checkout corto
 
-* Carrito accesible
+- Carrito accesible
 
-* Buscador visible
+- Buscador visible
 
-* Filtros simples
+- Filtros simples
 
 No crear elementos pequeños difíciles de tocar.
 
@@ -786,17 +786,17 @@ No crear elementos pequeños difíciles de tocar.
 
 Utilizar animaciones sutiles:
 
-* Fade-in al cargar secciones.
+- Fade-in al cargar secciones.
 
-* Hover en productos.
+- Hover en productos.
 
-* Transición al agregar al carrito.
+- Transición al agregar al carrito.
 
-* Badge animado al agregar producto.
+- Badge animado al agregar producto.
 
-* Drawer del carrito con transición.
+- Drawer del carrito con transición.
 
-* Transiciones suaves entre páginas.
+- Transiciones suaves entre páginas.
 
 No abusar de las animaciones.
 
@@ -808,21 +808,21 @@ La prioridad es conversión y velocidad.
 
 Preparar:
 
-* URLs amigables.
+- URLs amigables.
 
-* Meta title.
+- Meta title.
 
-* Meta description.
+- Meta description.
 
-* Open Graph.
+- Open Graph.
 
-* Sitemap.
+- Sitemap.
 
-* Robots.txt.
+- Robots.txt.
 
-* Datos estructurados de productos.
+- Datos estructurados de productos.
 
-* URLs tipo:
+- URLs tipo:
 
 `/tienda`
 
@@ -860,33 +860,33 @@ Breve descripción.
 
 ### Comprar
 
-* Tienda
+- Tienda
 
-* Plantas
+- Plantas
 
-* Macetas
+- Macetas
 
-* Accesorios
+- Accesorios
 
 ### Ayuda
 
-* Preguntas frecuentes
+- Preguntas frecuentes
 
-* Envíos
+- Envíos
 
-* Medios de pago
+- Medios de pago
 
-* Contacto
+- Contacto
 
 ### Contacto
 
-* WhatsApp
+- WhatsApp
 
-* Instagram
+- Instagram
 
-* Dirección
+- Dirección
 
-* Horarios
+- Horarios
 
 Agregar redes sociales.
 
@@ -902,19 +902,19 @@ Crear datos de ejemplo únicamente para visualizar el diseño.
 
 Separar claramente:
 
-* Frontend
+- Frontend
 
-* Backend
+- Backend
 
-* Base de datos
+- Base de datos
 
-* Autenticación
+- Autenticación
 
-* Administración
+- Administración
 
-* Pagos
+- Pagos
 
-Preparar integración real con Mercado Pago mediante variables de entorno.
+El número que recibe los pedidos se configura en `whatsapp` de `src/lib/store-config.ts`.
 
 Nunca colocar credenciales privadas en el frontend.
 
@@ -962,29 +962,29 @@ Crear primero la experiencia completa del cliente y después el dashboard admini
 
 Usar componentes reutilizables y una arquitectura limpia que permita agregar posteriormente:
 
-* Cupones
+- Cupones
 
-* Ofertas
+- Ofertas
 
-* Productos relacionados
+- Productos relacionados
 
-* Reviews
+- Reviews
 
-* Favoritos
+- Favoritos
 
-* Clientes
+- Clientes
 
-* Analytics
+- Analytics
 
-* Meta Pixel
+- Meta Pixel
 
-* Google Analytics
+- Google Analytics
 
-* Automatizaciones
+- Automatizaciones
 
-* Más métodos de envío
+- Más métodos de envío
 
-* Más métodos de pago
+- Más métodos de pago
 
 This project was built with [Lovable](https://lovable.dev).
 

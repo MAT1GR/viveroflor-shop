@@ -15,10 +15,12 @@ import { Route as AdminRouteImport } from './routes/admin'
 import { Route as CarritoRouteImport } from './routes/carrito'
 import { Route as CategoriasRouteImport } from './routes/categorias'
 import { Route as CheckoutRouteImport } from './routes/checkout'
-import { Route as CompraCanceladaRouteImport } from './routes/compra-cancelada'
+import { Route as ContactoRouteImport } from './routes/contacto'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as MacetasRouteImport } from './routes/macetas'
+import { Route as NosotrosRouteImport } from './routes/nosotros'
 import { Route as PlantasRouteImport } from './routes/plantas'
+import { Route as PreguntasFrecuentesRouteImport } from './routes/preguntas-frecuentes'
 import { Route as TiendaRouteImport } from './routes/tienda'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as AdminPedidosRouteImport } from './routes/admin.pedidos'
@@ -58,9 +60,9 @@ const CheckoutRoute = CheckoutRouteImport.update({
   path: '/checkout',
   getParentRoute: () => rootRouteImport,
 } as any)
-const CompraCanceladaRoute = CompraCanceladaRouteImport.update({
-  id: '/compra-cancelada',
-  path: '/compra-cancelada',
+const ContactoRoute = ContactoRouteImport.update({
+  id: '/contacto',
+  path: '/contacto',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LoginRoute = LoginRouteImport.update({
@@ -73,9 +75,19 @@ const MacetasRoute = MacetasRouteImport.update({
   path: '/macetas',
   getParentRoute: () => rootRouteImport,
 } as any)
+const NosotrosRoute = NosotrosRouteImport.update({
+  id: '/nosotros',
+  path: '/nosotros',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PlantasRoute = PlantasRouteImport.update({
   id: '/plantas',
   path: '/plantas',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PreguntasFrecuentesRoute = PreguntasFrecuentesRouteImport.update({
+  id: '/preguntas-frecuentes',
+  path: '/preguntas-frecuentes',
   getParentRoute: () => rootRouteImport,
 } as any)
 const TiendaRoute = TiendaRouteImport.update({
@@ -126,10 +138,12 @@ export interface FileRoutesByFullPath {
   '/carrito': typeof CarritoRoute
   '/categorias': typeof CategoriasRoute
   '/checkout': typeof CheckoutRoute
-  '/compra-cancelada': typeof CompraCanceladaRoute
+  '/contacto': typeof ContactoRoute
   '/login': typeof LoginRoute
   '/macetas': typeof MacetasRoute
+  '/nosotros': typeof NosotrosRoute
   '/plantas': typeof PlantasRoute
+  '/preguntas-frecuentes': typeof PreguntasFrecuentesRoute
   '/tienda': typeof TiendaRoute
   '/admin/pedidos': typeof AdminPedidosRoute
   '/pedido/$number': typeof PedidoNumberRoute
@@ -145,10 +159,12 @@ export interface FileRoutesByTo {
   '/carrito': typeof CarritoRoute
   '/categorias': typeof CategoriasRoute
   '/checkout': typeof CheckoutRoute
-  '/compra-cancelada': typeof CompraCanceladaRoute
+  '/contacto': typeof ContactoRoute
   '/login': typeof LoginRoute
   '/macetas': typeof MacetasRoute
+  '/nosotros': typeof NosotrosRoute
   '/plantas': typeof PlantasRoute
+  '/preguntas-frecuentes': typeof PreguntasFrecuentesRoute
   '/tienda': typeof TiendaRoute
   '/admin/pedidos': typeof AdminPedidosRoute
   '/pedido/$number': typeof PedidoNumberRoute
@@ -166,10 +182,12 @@ export interface FileRoutesById {
   '/carrito': typeof CarritoRoute
   '/categorias': typeof CategoriasRoute
   '/checkout': typeof CheckoutRoute
-  '/compra-cancelada': typeof CompraCanceladaRoute
+  '/contacto': typeof ContactoRoute
   '/login': typeof LoginRoute
   '/macetas': typeof MacetasRoute
+  '/nosotros': typeof NosotrosRoute
   '/plantas': typeof PlantasRoute
+  '/preguntas-frecuentes': typeof PreguntasFrecuentesRoute
   '/tienda': typeof TiendaRoute
   '/admin/pedidos': typeof AdminPedidosRoute
   '/pedido/$number': typeof PedidoNumberRoute
@@ -188,10 +206,12 @@ export interface FileRouteTypes {
     | '/carrito'
     | '/categorias'
     | '/checkout'
-    | '/compra-cancelada'
+    | '/contacto'
     | '/login'
     | '/macetas'
+    | '/nosotros'
     | '/plantas'
+    | '/preguntas-frecuentes'
     | '/tienda'
     | '/admin/pedidos'
     | '/pedido/$number'
@@ -207,10 +227,12 @@ export interface FileRouteTypes {
     | '/carrito'
     | '/categorias'
     | '/checkout'
-    | '/compra-cancelada'
+    | '/contacto'
     | '/login'
     | '/macetas'
+    | '/nosotros'
     | '/plantas'
+    | '/preguntas-frecuentes'
     | '/tienda'
     | '/admin/pedidos'
     | '/pedido/$number'
@@ -227,10 +249,12 @@ export interface FileRouteTypes {
     | '/carrito'
     | '/categorias'
     | '/checkout'
-    | '/compra-cancelada'
+    | '/contacto'
     | '/login'
     | '/macetas'
+    | '/nosotros'
     | '/plantas'
+    | '/preguntas-frecuentes'
     | '/tienda'
     | '/admin/pedidos'
     | '/pedido/$number'
@@ -248,10 +272,12 @@ export interface RootRouteChildren {
   CarritoRoute: typeof CarritoRoute
   CategoriasRoute: typeof CategoriasRoute
   CheckoutRoute: typeof CheckoutRoute
-  CompraCanceladaRoute: typeof CompraCanceladaRoute
+  ContactoRoute: typeof ContactoRoute
   LoginRoute: typeof LoginRoute
   MacetasRoute: typeof MacetasRoute
+  NosotrosRoute: typeof NosotrosRoute
   PlantasRoute: typeof PlantasRoute
+  PreguntasFrecuentesRoute: typeof PreguntasFrecuentesRoute
   TiendaRoute: typeof TiendaRoute
   PedidoNumberRoute: typeof PedidoNumberRoute
   ProductoSlugRoute: typeof ProductoSlugRoute
@@ -301,11 +327,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CheckoutRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/compra-cancelada': {
-      id: '/compra-cancelada'
-      path: '/compra-cancelada'
-      fullPath: '/compra-cancelada'
-      preLoaderRoute: typeof CompraCanceladaRouteImport
+    '/contacto': {
+      id: '/contacto'
+      path: '/contacto'
+      fullPath: '/contacto'
+      preLoaderRoute: typeof ContactoRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/login': {
@@ -322,11 +348,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MacetasRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/nosotros': {
+      id: '/nosotros'
+      path: '/nosotros'
+      fullPath: '/nosotros'
+      preLoaderRoute: typeof NosotrosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/plantas': {
       id: '/plantas'
       path: '/plantas'
       fullPath: '/plantas'
       preLoaderRoute: typeof PlantasRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/preguntas-frecuentes': {
+      id: '/preguntas-frecuentes'
+      path: '/preguntas-frecuentes'
+      fullPath: '/preguntas-frecuentes'
+      preLoaderRoute: typeof PreguntasFrecuentesRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/tienda': {
@@ -413,10 +453,12 @@ const rootRouteChildren: RootRouteChildren = {
   CarritoRoute: CarritoRoute,
   CategoriasRoute: CategoriasRoute,
   CheckoutRoute: CheckoutRoute,
-  CompraCanceladaRoute: CompraCanceladaRoute,
+  ContactoRoute: ContactoRoute,
   LoginRoute: LoginRoute,
   MacetasRoute: MacetasRoute,
+  NosotrosRoute: NosotrosRoute,
   PlantasRoute: PlantasRoute,
+  PreguntasFrecuentesRoute: PreguntasFrecuentesRoute,
   TiendaRoute: TiendaRoute,
   PedidoNumberRoute: PedidoNumberRoute,
   ProductoSlugRoute: ProductoSlugRoute,

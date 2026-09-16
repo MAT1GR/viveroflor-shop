@@ -83,7 +83,8 @@ export const products: Product[] = productsData as Product[];
 
 export const getCategory = (slug: string) => categories.find((c) => c.slug === slug);
 export const getProduct = (slug: string) => products.find((p) => p.slug === slug && p.active);
-export const categoryName = (id: string) => categories.find((c) => c.id === id)?.name ?? "Productos";
+export const categoryName = (id: string) =>
+  categories.find((c) => c.id === id)?.name ?? "Productos";
 
 export const discountPercent = (p: Product) =>
   p.compare_price && p.compare_price > p.price
@@ -93,5 +94,7 @@ export const discountPercent = (p: Product) =>
 export const relatedProducts = (p: Product, limit = 4) =>
   products
     .filter((x) => x.active && x.id !== p.id)
-    .sort((a, b) => Number(b.category_id === p.category_id) - Number(a.category_id === p.category_id))
+    .sort(
+      (a, b) => Number(b.category_id === p.category_id) - Number(a.category_id === p.category_id),
+    )
     .slice(0, limit);

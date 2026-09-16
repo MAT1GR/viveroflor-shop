@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { ArrowRight, Leaf, Truck, ShieldCheck, Store } from "lucide-react";
+import { ArrowRight, Leaf, MessageCircle, Truck, Store } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { SiteShell } from "@/components/site/SiteShell";
 import { ProductCard } from "@/components/site/ProductCard";
@@ -28,16 +28,26 @@ export const Route = createFileRoute("/")({
 });
 
 const benefits = [
-  { icon: Truck, title: "Envío en Rosario", text: `Gratis desde ${formatPrice(storeConfig.shipping.freeFrom)}` },
+  {
+    icon: Truck,
+    title: "Envío en Rosario",
+    text: `${formatPrice(storeConfig.shipping.deliveryCost)} · desde ${formatPrice(storeConfig.shipping.minOrderForDelivery)} de compra`,
+  },
   { icon: Store, title: "Retiro por el local", text: storeConfig.address },
-  { icon: ShieldCheck, title: "Pago seguro", text: "Mercado Pago o transferencia" },
+  {
+    icon: MessageCircle,
+    title: "Pedidos por WhatsApp",
+    text: "Coordinamos pago y entrega por chat",
+  },
   { icon: Leaf, title: "Plantas sanas", text: "Seleccionadas una por una" },
 ];
 
 function Index() {
   const allProducts = Route.useLoaderData();
   const featured = allProducts.filter((p) => p.featured && p.active).slice(0, 4);
-  const offers = allProducts.filter((p) => p.compare_price && p.compare_price > p.price).slice(0, 3);
+  const offers = allProducts
+    .filter((p) => p.compare_price && p.compare_price > p.price)
+    .slice(0, 3);
 
   return (
     <SiteShell>
@@ -48,7 +58,9 @@ function Index() {
               Vivero en Rosario · Santa Fe
             </p>
             <h1 className="mt-4 font-display text-4xl font-semibold leading-[1.05] md:text-6xl">
-              Plantas que hacen<br />sentir tu casa
+              Plantas que hacen
+              <br />
+              sentir tu casa
             </h1>
             <p className="mt-5 max-w-lg text-lg text-muted-foreground">
               {storeConfig.tagline} Elegí online, te lo llevamos a tu puerta o lo retirás por el
@@ -74,9 +86,9 @@ function Index() {
               className="aspect-[4/3] w-full rounded-3xl object-cover shadow-lift"
             />
             <div className="absolute -bottom-5 left-5 rounded-2xl border border-border bg-card px-5 py-3 shadow-lift">
-              <p className="text-xs text-muted-foreground">Envío gratis desde</p>
+              <p className="text-xs text-muted-foreground">Envío en Rosario</p>
               <p className="font-display text-xl font-semibold">
-                {formatPrice(storeConfig.shipping.freeFrom)}
+                {formatPrice(storeConfig.shipping.deliveryCost)}
               </p>
             </div>
           </div>
@@ -114,7 +126,7 @@ function Index() {
             <Link
               key={c.id}
               to="/tienda"
-              search={{ q: undefined }}
+              search={{}}
               className="group relative overflow-hidden rounded-2xl border border-border shadow-soft transition-transform hover:-translate-y-1"
             >
               <img

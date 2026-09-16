@@ -1,6 +1,7 @@
 import { createFileRoute, Outlet, Link, redirect, useRouter } from "@tanstack/react-router";
 import { Package, LogOut, ShoppingBag } from "lucide-react";
 import { checkAuthFn, logoutFn } from "@/lib/auth-server";
+import { LogoMark } from "@/components/site/Logo";
 
 export const Route = createFileRoute("/admin")({
   beforeLoad: async () => {
@@ -14,12 +15,13 @@ export const Route = createFileRoute("/admin")({
 
 function AdminLayout() {
   const router = useRouter();
-  
+
   return (
     <div className="flex min-h-screen w-full bg-muted/40">
       <aside className="fixed inset-y-0 left-0 z-10 hidden w-64 flex-col border-r bg-background sm:flex">
         <div className="flex h-14 items-center border-b px-4 lg:h-[60px] lg:px-6">
           <Link to="/" className="flex items-center gap-2 font-semibold">
+            <LogoMark size={28} />
             <span className="font-display">ViveroFlor Admin</span>
           </Link>
         </div>

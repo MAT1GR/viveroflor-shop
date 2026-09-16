@@ -1,10 +1,11 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
-import { Menu, Search, ShoppingBag, User, X, Leaf } from "lucide-react";
+import { Menu, Search, ShoppingBag, User, X } from "lucide-react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useCart } from "@/lib/cart";
+import { Logo } from "./Logo";
 import { cn } from "@/lib/utils";
 
 const navLinks = [
@@ -35,17 +36,14 @@ export function Header() {
     e.preventDefault();
     setSearchOpen(false);
     setMenuOpen(false);
-    navigate({ to: "/tienda", search: { q: query || undefined } });
+    navigate({ to: "/tienda", search: query.trim() ? { q: query.trim() } : {} });
   };
 
   return (
     <header className="sticky top-0 z-50 border-b border-border/70 bg-background/85 backdrop-blur-md">
       <div className="container-page flex h-16 items-center justify-between gap-4">
-        <Link to="/" className="flex items-center gap-2" aria-label="ViveroFlor - inicio">
-          <span className="flex size-9 items-center justify-center rounded-full bg-primary text-primary-foreground">
-            <Leaf className="size-5" />
-          </span>
-          <span className="font-display text-xl font-semibold tracking-tight">ViveroFlor</span>
+        <Link to="/" aria-label="ViveroFlor - inicio">
+          <Logo size={44} wordmarkClassName="text-xl" />
         </Link>
 
         <nav className="hidden items-center gap-1 lg:flex">
@@ -70,12 +68,24 @@ export function Header() {
           >
             {searchOpen ? <X className="size-5" /> : <Search className="size-5" />}
           </Button>
-          <Button variant="ghost" size="icon" aria-label="Mi cuenta" asChild className="hidden sm:inline-flex">
+          <Button
+            variant="ghost"
+            size="icon"
+            aria-label="Mi cuenta"
+            asChild
+            className="hidden sm:inline-flex"
+          >
             <Link to="/contacto">
               <User className="size-5" />
             </Link>
           </Button>
-          <Button variant="ghost" size="icon" aria-label="Abrir carrito" onClick={openCart} className="relative">
+          <Button
+            variant="ghost"
+            size="icon"
+            aria-label="Abrir carrito"
+            onClick={openCart}
+            className="relative"
+          >
             <ShoppingBag className="size-5" />
             {count > 0 && (
               <span

@@ -4,6 +4,9 @@ import { Button } from "@/components/ui/button";
 import { formatPrice } from "@/lib/store-config";
 import { getProductsFn } from "@/lib/catalog-server";
 
+/** Desde acá el stock se marca en amarillo en el listado. */
+const LOW_STOCK = 3;
+
 export const Route = createFileRoute("/admin/productos/")({
   loader: () => getProductsFn(),
   component: AdminProducts,
@@ -40,12 +43,34 @@ function AdminProducts() {
                 <tr key={product.id} className="bg-card hover:bg-muted/50">
                   <td className="px-6 py-4 font-medium flex items-center gap-3">
                     {product.images?.[0] && (
-                      <img src={product.images[0]} alt={product.name} className="h-10 w-10 rounded-md object-cover" />
+                      <img
+                        src={product.images[0]}
+                        alt={product.name}
+                        className="h-10 w-10 rounded-md object-cover"
+                      />
                     )}
                     {product.name}
                   </td>
                   <td className="px-6 py-4">{formatPrice(product.price)}</td>
-                  <td className="px-6 py-4">{product.stock}</td>
+                  <td className="px-6 py-4">
+                    <span
+                      className={
+                        product.stock === 0
+                          ? "font-semibold text-destructive"
+                          : product.stock <= LOW_STOCK
+                            ? "font-semibold text-amber-600"
+                            : ""
+                      }
+                    >
+                      {product.stock}
+                    </span>
+                    {product.stock === 0 && (
+                      <span className="ml-2 text-xs text-muted-foreground">sin stock</span>
+                    )}
+                    {product.stock > 0 && product.stock <= LOW_STOCK && (
+                      <span className="ml-2 text-xs text-muted-foreground">quedan pocas</span>
+                    )}
+                  </td>
                   <td className="px-6 py-4">
                     <span
                       className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold ${

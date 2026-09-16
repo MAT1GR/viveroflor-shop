@@ -1,6 +1,15 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { ArrowLeft, CreditCard, Loader2, Lock, ShieldCheck, Store, Truck } from "lucide-react";
+import {
+  ArrowLeft,
+  Info,
+  Loader2,
+  MessageCircle,
+  ShieldCheck,
+  Sparkles,
+  Store,
+  Truck,
+} from "lucide-react";
 import { toast } from "sonner";
 import { SiteShell, PageHeader } from "@/components/site/SiteShell";
 import { Button } from "@/components/ui/button";
@@ -8,10 +17,20 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useCart } from "@/lib/cart";
-import { formatPrice, shippingCostFor, storeConfig } from "@/lib/store-config";
-import { newOrderNumber, saveOrder, type Order, type ShippingMethod } from "@/lib/orders";
+import {
+  canDeliver,
+  formatPrice,
+  formatPromoEnd,
+  getActivePromo,
+  missingForDelivery,
+  promoDiscountFor,
+  shippingCostFor,
+  storeConfig,
+  waLink,
+} from "@/lib/store-config";
+import type { Order, ShippingMethod } from "@/lib/orders";
 import { saveOrderFn } from "@/lib/orders-server";
-import { createPreference, paymentMethods, type PaymentMethodId } from "@/lib/mercadopago";
+import { buildOrderWhatsAppMessage, paymentMethods, type PaymentMethodId } from "@/lib/payments";
 
 export const Route = createFileRoute("/checkout")({
   head: () => ({
@@ -19,10 +38,14 @@ export const Route = createFileRoute("/checkout")({
       { title: "Checkout · ViveroFlor" },
       {
         name: "description",
-        content: "Completá tus datos, elegí envío en Rosario o retiro por el local y pagá con Mercado Pago.",
+        content:
+          "Completá tus datos, elegí envío en Rosario o retiro por el local y confirmá tu pedido por WhatsApp.",
       },
       { property: "og:title", content: "Checkout · ViveroFlor" },
-      { property: "og:description", content: "Pago seguro con Mercado Pago, envío en Rosario o retiro por el local." },
+      {
+        property: "og:description",
+        content: "Confirmás tu pedido por WhatsApp, con envío en Rosario o retiro por el local.",
+      },
     ],
   }),
   component: CheckoutPage,
@@ -59,18 +82,34 @@ function CheckoutPage() {
   const { items, subtotal, clear } = useCart();
   const [form, setForm] = useState<Form>(emptyForm);
   const [method, setMethod] = useState<ShippingMethod>("delivery");
-  const [payment, setPayment] = useState<PaymentMethodId>("mercadopago");
+  const [payment, setPayment] = useState<PaymentMethodId>("whatsapp");
   const [errors, setErrors] = useState<Partial<Record<keyof Form, string>>>({});
   const [loading, setLoading] = useState(false);
 
-  const shipping = useMemo(() => shippingCostFor(subtotal, method), [subtotal, method]);
-  const total = subtotal + shipping;
+  const deliveryAvailable = canDeliver(subtotal);
+  const missing = missingForDelivery(subtotal);
+
+  // Debajo de la compra mínima sólo queda el retiro por el local.
+  const effectiveMethod: ShippingMethod = deliveryAvailable ? method : "pickup";
+
+  const promo = useMemo(() => getActivePromo(), []);
+  const shipping = useMemo(
+    () => shippingCostFor(subtotal, effectiveMethod),
+    [subtotal, effectiveMethod],
+  );
+  const discount = useMemo(() => promoDiscountFor(subtotal, payment), [subtotal, payment]);
+  const total = subtotal - discount + shipping;
   const set = (k: keyof Form) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
     setForm((f) => ({ ...f, [k]: e.target.value }));
 
   const availablePayments = paymentMethods.filter(
-    (m) => m.id !== "efectivo_local" || method === "pickup",
+    (m) => m.id !== "efectivo_local" || effectiveMethod === "pickup",
   );
+
+  // Si el método elegido dejó de estar disponible, volvemos al de WhatsApp.
+  useEffect(() => {
+    if (!availablePayments.some((m) => m.id === payment)) setPayment("whatsapp");
+  }, [availablePayments, payment]);
 
   const validate = () => {
     const e: Partial<Record<keyof Form, string>> = {};
@@ -78,7 +117,7 @@ function CheckoutPage() {
     if (!form.last_name.trim()) e.last_name = "Ingresá tu apellido";
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) e.email = "Email inválido";
     if (form.phone.replace(/\D/g, "").length < 8) e.phone = "Teléfono inválido";
-    if (method === "delivery") {
+    if (effectiveMethod === "delivery") {
       if (!form.street.trim()) e.street = "Ingresá la calle";
       if (!form.number.trim()) e.number = "Ingresá la altura";
       if (!form.city.trim()) e.city = "Ingresá la ciudad";
@@ -96,10 +135,11 @@ function CheckoutPage() {
     }
 
     setLoading(true);
-    const number = newOrderNumber();
+    // `number`, importes y estados los define el servidor; acá sólo mandamos
+    // los datos del cliente y el carrito.
     const order: Order = {
       id: crypto.randomUUID(),
-      number,
+      number: "",
       status: "pendiente",
       payment_status: "pendiente",
       customer: {
@@ -108,9 +148,9 @@ function CheckoutPage() {
         email: form.email.trim(),
         phone: form.phone.trim(),
       },
-      shipping_method: method,
+      shipping_method: effectiveMethod,
       shipping_address:
-        method === "delivery"
+        effectiveMethod === "delivery"
           ? {
               street: form.street.trim(),
               number: form.number.trim(),
@@ -122,44 +162,47 @@ function CheckoutPage() {
       items,
       subtotal,
       shipping_cost: shipping,
+      discount,
       total,
       payment_method: payment,
-      notes: form.notes.trim() || undefined,
+      ...(form.notes.trim() ? { notes: form.notes.trim() } : {}),
       created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
     };
 
     try {
-      if (payment !== "efectivo_local") {
-        const result = await createPreference({
-          data: {
-            orderNumber: number,
-            items,
-            shippingCost: shipping,
-            shippingMethod: method,
-            payer: {
-              name: `${order.customer.first_name} ${order.customer.last_name}`,
-              email: order.customer.email,
-              phone: order.customer.phone,
-            },
-            successUrl: `${window.location.origin}/pedido/${number}`,
-            failureUrl: `${window.location.origin}/compra-cancelada`,
-          }
-        });
-        
-        await saveOrderFn({ data: order });
-        clear();
-        
-        // Redirigir a Mercado Pago
-        window.location.href = result.init_point;
-        return; // Detener ejecución aquí, el navegador cambiará de página
-      } else {
-        await saveOrderFn({ data: order });
-        clear();
-        navigate({ to: "/pedido/$number", params: { number } });
-      }
-    } catch {
-      toast.error("No pudimos iniciar el pago", { description: "Intentá nuevamente en unos segundos." });
-      navigate({ to: "/compra-cancelada" });
+      // Guardar el pedido ya descuenta el stock, así que es lo primero:
+      // si una planta se agotó recién, falla acá y no llegamos a mandar nada.
+      // Los importes que devuelve el servidor son los que valen: el mensaje de
+      // WhatsApp se arma con esos, no con los calculados en el navegador.
+      const priced = await saveOrderFn({ data: order });
+
+      const message = buildOrderWhatsAppMessage({
+        orderNumber: priced.number,
+        customer: order.customer,
+        shippingMethod: order.shipping_method,
+        shippingAddress: order.shipping_address,
+        paymentMethod: payment,
+        items: priced.items,
+        subtotal: priced.subtotal,
+        discount: priced.discount,
+        shippingCost: priced.shipping_cost,
+        total: priced.total,
+        notes: order.notes,
+      });
+
+      clear();
+      // Abrimos WhatsApp en otra pestaña y dejamos al cliente en el detalle del
+      // pedido, así no pierde el número si vuelve al navegador.
+      window.open(waLink(message), "_blank", "noopener,noreferrer");
+      navigate({ to: "/pedido/$number", params: { number: priced.number } });
+    } catch (err) {
+      toast.error("No pudimos confirmar el pedido", {
+        description:
+          err instanceof Error && err.message
+            ? err.message
+            : "Intentá nuevamente en unos segundos.",
+      });
     } finally {
       setLoading(false);
     }
@@ -180,7 +223,11 @@ function CheckoutPage() {
 
   return (
     <SiteShell>
-      <PageHeader eyebrow="Paso 2 de 3" title="Finalizar compra" subtitle="Datos de contacto, entrega y pago." />
+      <PageHeader
+        eyebrow="Paso 2 de 3"
+        title="Finalizar compra"
+        subtitle="Datos de contacto, entrega y pago."
+      />
 
       <form onSubmit={submit} className="container-page grid gap-8 py-10 lg:grid-cols-[1fr_380px]">
         <div className="space-y-6">
@@ -188,40 +235,69 @@ function CheckoutPage() {
             <h2 className="font-display text-lg font-semibold">1. Tus datos</h2>
             <div className="mt-4 grid gap-4 sm:grid-cols-2">
               <Field label="Nombre" error={errors.first_name}>
-                <Input value={form.first_name} onChange={set("first_name")} autoComplete="given-name" />
+                <Input
+                  value={form.first_name}
+                  onChange={set("first_name")}
+                  autoComplete="given-name"
+                />
               </Field>
               <Field label="Apellido" error={errors.last_name}>
-                <Input value={form.last_name} onChange={set("last_name")} autoComplete="family-name" />
+                <Input
+                  value={form.last_name}
+                  onChange={set("last_name")}
+                  autoComplete="family-name"
+                />
               </Field>
               <Field label="Email" error={errors.email}>
-                <Input type="email" value={form.email} onChange={set("email")} autoComplete="email" />
+                <Input
+                  type="email"
+                  value={form.email}
+                  onChange={set("email")}
+                  autoComplete="email"
+                />
               </Field>
               <Field label="Teléfono / WhatsApp" error={errors.phone}>
-                <Input value={form.phone} onChange={set("phone")} inputMode="tel" placeholder="341 555 0198" />
+                <Input
+                  value={form.phone}
+                  onChange={set("phone")}
+                  inputMode="tel"
+                  placeholder="341 555 1588"
+                />
               </Field>
             </div>
           </section>
 
           <section className="rounded-2xl border border-border bg-card p-5 shadow-soft">
             <h2 className="font-display text-lg font-semibold">2. Entrega</h2>
+            {!deliveryAvailable && (
+              <p className="mt-3 flex items-start gap-2 rounded-xl bg-secondary p-3 text-sm">
+                <Info className="mt-0.5 size-4 shrink-0 text-primary" />
+                <span>
+                  El envío a domicilio requiere una compra mínima de{" "}
+                  <strong>{formatPrice(storeConfig.shipping.minOrderForDelivery)}</strong>. Te
+                  faltan <strong>{formatPrice(missing)}</strong> — mientras tanto podés retirar por
+                  el local sin cargo.
+                </span>
+              </p>
+            )}
+
             <div className="mt-4 grid gap-3 sm:grid-cols-2">
               <OptionCard
-                selected={method === "delivery"}
+                selected={effectiveMethod === "delivery"}
+                disabled={!deliveryAvailable}
                 onSelect={() => setMethod("delivery")}
                 icon={<Truck className="size-5 text-primary" />}
                 title={storeConfig.shipping.deliveryLabel}
-                description="Entregas de lunes a sábado, coordinamos horario por WhatsApp."
-                price={
-                  shippingCostFor(subtotal, "delivery") === 0
-                    ? "Gratis"
-                    : formatPrice(storeConfig.shipping.deliveryCost)
+                description={
+                  deliveryAvailable
+                    ? "Entregas de lunes a sábado, coordinamos horario por WhatsApp."
+                    : `Disponible desde ${formatPrice(storeConfig.shipping.minOrderForDelivery)} de compra.`
                 }
+                price={formatPrice(storeConfig.shipping.deliveryCost)}
               />
               <OptionCard
-                selected={method === "pickup"}
-                onSelect={() => {
-                  setMethod("pickup");
-                }}
+                selected={effectiveMethod === "pickup"}
+                onSelect={() => setMethod("pickup")}
                 icon={<Store className="size-5 text-primary" />}
                 title={storeConfig.shipping.pickupLabel}
                 description={`${storeConfig.address} · ${storeConfig.hours}`}
@@ -229,10 +305,14 @@ function CheckoutPage() {
               />
             </div>
 
-            {method === "delivery" && (
+            {effectiveMethod === "delivery" && (
               <div className="mt-5 grid gap-4 sm:grid-cols-2">
                 <Field label="Calle" error={errors.street}>
-                  <Input value={form.street} onChange={set("street")} autoComplete="address-line1" />
+                  <Input
+                    value={form.street}
+                    onChange={set("street")}
+                    autoComplete="address-line1"
+                  />
                 </Field>
                 <Field label="Altura" error={errors.number}>
                   <Input value={form.number} onChange={set("number")} />
@@ -251,7 +331,12 @@ function CheckoutPage() {
 
             <div className="mt-4">
               <Field label="Notas para la entrega (opcional)">
-                <Textarea rows={3} value={form.notes} onChange={set("notes")} placeholder="Timbre, referencia, horario preferido…" />
+                <Textarea
+                  rows={3}
+                  value={form.notes}
+                  onChange={set("notes")}
+                  placeholder="Timbre, referencia, horario preferido…"
+                />
               </Field>
             </div>
           </section>
@@ -259,8 +344,18 @@ function CheckoutPage() {
           <section className="rounded-2xl border border-border bg-card p-5 shadow-soft">
             <h2 className="font-display text-lg font-semibold">3. Pago</h2>
             <p className="mt-1 text-sm text-muted-foreground">
-              El pago se procesa con Mercado Pago. No guardamos datos de tu tarjeta.
+              No cobramos online: al confirmar te abrimos WhatsApp con el detalle del pedido y
+              coordinamos el pago por ahí.
             </p>
+            {promo && (
+              <p className="mt-3 flex items-start gap-2 rounded-xl bg-secondary p-3 text-sm">
+                <Sparkles className="mt-0.5 size-4 shrink-0 text-primary" />
+                <span>
+                  <strong>{promo.shortLabel}</strong> hasta el {formatPromoEnd(promo.endsOn)}. Se
+                  aplica al elegir <em>Efectivo al retirar</em>.
+                </span>
+              </p>
+            )}
             <div className="mt-4 space-y-3">
               {availablePayments.map((m) => (
                 <button
@@ -268,7 +363,9 @@ function CheckoutPage() {
                   key={m.id}
                   onClick={() => setPayment(m.id)}
                   className={`flex w-full items-start gap-3 rounded-xl border p-4 text-left transition-colors ${
-                    payment === m.id ? "border-primary bg-secondary/60" : "border-border hover:bg-secondary/30"
+                    payment === m.id
+                      ? "border-primary bg-secondary/60"
+                      : "border-border hover:bg-secondary/30"
                   }`}
                 >
                   <span
@@ -287,14 +384,16 @@ function CheckoutPage() {
                         </span>
                       )}
                     </span>
-                    <span className="mt-0.5 block text-sm text-muted-foreground">{m.description}</span>
+                    <span className="mt-0.5 block text-sm text-muted-foreground">
+                      {m.description}
+                    </span>
                   </span>
-                  <CreditCard className="mt-1 size-4 text-muted-foreground" />
+                  <MessageCircle className="mt-1 size-4 text-muted-foreground" />
                 </button>
               ))}
             </div>
             <p className="mt-4 flex items-center gap-2 text-xs text-muted-foreground">
-              <ShieldCheck className="size-4 text-primary" /> Conexión segura · datos protegidos
+              <ShieldCheck className="size-4 text-primary" /> No pedimos datos de tarjeta en la web
             </p>
           </section>
         </div>
@@ -304,7 +403,12 @@ function CheckoutPage() {
           <ul className="space-y-3">
             {items.map((i) => (
               <li key={i.productId} className="flex items-center gap-3">
-                <img src={i.image} alt={i.name} loading="lazy" className="size-14 rounded-lg object-cover" />
+                <img
+                  src={i.image}
+                  alt={i.name}
+                  loading="lazy"
+                  className="size-14 rounded-lg object-cover"
+                />
                 <div className="min-w-0 flex-1">
                   <p className="truncate text-sm font-medium">{i.name}</p>
                   <p className="text-xs text-muted-foreground">
@@ -320,11 +424,21 @@ function CheckoutPage() {
               <span className="text-muted-foreground">Subtotal</span>
               <span className="font-medium">{formatPrice(subtotal)}</span>
             </div>
+            {discount > 0 && (
+              <div className="flex justify-between text-primary">
+                <span>Descuento {storeConfig.promo.percent}% efectivo</span>
+                <span className="font-medium">-{formatPrice(discount)}</span>
+              </div>
+            )}
             <div className="flex justify-between">
               <span className="text-muted-foreground">
-                {method === "pickup" ? storeConfig.shipping.pickupLabel : storeConfig.shipping.deliveryLabel}
+                {effectiveMethod === "pickup"
+                  ? storeConfig.shipping.pickupLabel
+                  : storeConfig.shipping.deliveryLabel}
               </span>
-              <span className="font-medium">{shipping === 0 ? "Gratis" : formatPrice(shipping)}</span>
+              <span className="font-medium">
+                {shipping === 0 ? "Gratis" : formatPrice(shipping)}
+              </span>
             </div>
           </div>
           <div className="flex justify-between border-t border-border pt-3 text-lg font-semibold">
@@ -334,12 +448,11 @@ function CheckoutPage() {
           <Button type="submit" size="lg" className="w-full" disabled={loading}>
             {loading ? (
               <>
-                <Loader2 className="mr-2 size-4 animate-spin" /> Redirigiendo a Mercado Pago…
+                <Loader2 className="mr-2 size-4 animate-spin" /> Preparando tu pedido…
               </>
             ) : (
               <>
-                <Lock className="mr-2 size-4" />
-                {payment === "efectivo_local" ? "Confirmar pedido" : "Pagar con Mercado Pago"}
+                <MessageCircle className="mr-2 size-4" /> Confirmar pedido por WhatsApp
               </>
             )}
           </Button>
@@ -360,7 +473,7 @@ function Field({
   children,
 }: {
   label: string;
-  error?: string;
+  error?: string | undefined;
   children: React.ReactNode;
 }) {
   return (
@@ -379,6 +492,7 @@ function OptionCard({
   title,
   description,
   price,
+  disabled = false,
 }: {
   selected: boolean;
   onSelect: () => void;
@@ -386,12 +500,15 @@ function OptionCard({
   title: string;
   description: string;
   price: string;
+  disabled?: boolean;
 }) {
   return (
     <button
       type="button"
       onClick={onSelect}
-      className={`flex h-full flex-col gap-1 rounded-xl border p-4 text-left transition-colors ${
+      disabled={disabled}
+      aria-disabled={disabled}
+      className={`flex h-full flex-col gap-1 rounded-xl border p-4 text-left transition-colors disabled:cursor-not-allowed disabled:opacity-55 ${
         selected ? "border-primary bg-secondary/60" : "border-border hover:bg-secondary/30"
       }`}
     >

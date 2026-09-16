@@ -1,10 +1,11 @@
 import { createFileRoute, useNavigate, redirect } from "@tanstack/react-router";
 import { useState } from "react";
-import { Leaf, Loader2 } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { loginFn, checkAuthFn } from "@/lib/auth-server";
+import { LogoMark } from "@/components/site/Logo";
 
 export const Route = createFileRoute("/login")({
   beforeLoad: async () => {
@@ -46,9 +47,7 @@ function Login() {
     <div className="flex min-h-screen items-center justify-center bg-cream/30 p-4">
       <div className="w-full max-w-sm rounded-3xl border bg-card p-8 shadow-soft">
         <div className="mb-8 flex flex-col items-center text-center">
-          <div className="flex size-12 items-center justify-center rounded-full bg-primary/10">
-            <Leaf className="size-6 text-primary" />
-          </div>
+          <LogoMark size={72} />
           <h1 className="mt-4 font-display text-2xl font-bold">Panel de Control</h1>
           <p className="text-sm text-muted-foreground">Ingresa tus credenciales para continuar</p>
         </div>

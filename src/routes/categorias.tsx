@@ -10,7 +10,8 @@ export const Route = createFileRoute("/categorias")({
       { title: "Categorías · ViveroFlor" },
       {
         name: "description",
-        content: "Recorré las categorías del vivero: plantas, macetas, interior, exterior y accesorios.",
+        content:
+          "Recorré las categorías del vivero: plantas, macetas, interior, exterior y accesorios.",
       },
       { property: "og:title", content: "Categorías · ViveroFlor" },
       { property: "og:description", content: "Plantas, macetas, interior, exterior y accesorios." },
@@ -31,7 +32,7 @@ function Categorias() {
             <Link
               key={c.id}
               to="/tienda"
-              search={{ q: undefined }}
+              search={{}}
               className="group overflow-hidden rounded-2xl border border-border bg-card shadow-soft transition-transform hover:-translate-y-1"
             >
               <img

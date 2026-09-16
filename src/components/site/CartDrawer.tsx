@@ -3,11 +3,18 @@ import { Minus, Plus, ShoppingBag, Trash2 } from "lucide-react";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { useCart } from "@/lib/cart";
-import { formatPrice, shippingCostFor, storeConfig } from "@/lib/store-config";
+import {
+  canDeliver,
+  formatPrice,
+  missingForDelivery,
+  shippingCostFor,
+  storeConfig,
+} from "@/lib/store-config";
 
 export function CartDrawer() {
   const { isOpen, closeCart, items, subtotal, setQuantity, remove, count } = useCart();
   const shipping = shippingCostFor(subtotal, "delivery");
+  const missing = missingForDelivery(subtotal);
 
   return (
     <Sheet open={isOpen} onOpenChange={(v) => !v && closeCart()}>
@@ -75,7 +82,9 @@ export function CartDrawer() {
                           >
                             <Minus className="size-4" />
                           </button>
-                          <span className="w-8 text-center text-sm font-medium">{item.quantity}</span>
+                          <span className="w-8 text-center text-sm font-medium">
+                            {item.quantity}
+                          </span>
                           <button
                             className="flex size-9 items-center justify-center rounded-full hover:bg-secondary disabled:opacity-40"
                             aria-label="Sumar unidad"
@@ -100,15 +109,16 @@ export function CartDrawer() {
                 <span className="text-muted-foreground">Subtotal</span>
                 <span className="font-medium">{formatPrice(subtotal)}</span>
               </div>
-              <div className="flex justify-between text-sm">
-                <span className="text-muted-foreground">Envío en Rosario</span>
-                <span className="font-medium">
-                  {shipping === 0 ? "Gratis" : formatPrice(shipping)}
-                </span>
-              </div>
+              {canDeliver(subtotal) && (
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">Envío en Rosario</span>
+                  <span className="font-medium">{formatPrice(shipping)}</span>
+                </div>
+              )}
               <p className="text-xs text-muted-foreground">
-                Retirando por el local el envío es sin costo. Envío gratis desde{" "}
-                {formatPrice(storeConfig.shipping.freeFrom)}.
+                {missing > 0
+                  ? `Retiro por el local sin costo. Te faltan ${formatPrice(missing)} para poder pedir envío.`
+                  : `Retiro por el local sin costo. Envío en Rosario ${formatPrice(storeConfig.shipping.deliveryCost)}.`}
               </p>
               <div className="flex justify-between border-t border-border pt-3 text-base font-semibold">
                 <span>Total estimado</span>

@@ -13,18 +13,27 @@ export const Route = createFileRoute("/producto/$slug")({
   loader: async ({ params }) => {
     const product = await getProductBySlugFn({ data: params.slug });
     if (!product) throw notFound();
-    
+
     const allProducts = await getProductsFn();
     const related = allProducts
       .filter((x) => x.active && x.id !== product.id)
-      .sort((a, b) => Number(b.category_id === product.category_id) - Number(a.category_id === product.category_id))
+      .sort(
+        (a, b) =>
+          Number(b.category_id === product.category_id) -
+          Number(a.category_id === product.category_id),
+      )
       .slice(0, 4);
 
     return { product, related };
   },
   head: ({ loaderData }) => {
     if (!loaderData) {
-      return { meta: [{ title: "Producto no encontrado · ViveroFlor" }, { name: "robots", content: "noindex" }] };
+      return {
+        meta: [
+          { title: "Producto no encontrado · ViveroFlor" },
+          { name: "robots", content: "noindex" },
+        ],
+      };
     }
     const { product } = loaderData;
     const title = `${product.name} · ViveroFlor`;
@@ -142,7 +151,11 @@ function ProductPage() {
                 </button>
               </div>
               <p className="text-sm text-muted-foreground">
-                {outOfStock ? "Sin stock por ahora" : `${product.stock} unidades disponibles`}
+                {outOfStock
+                  ? "Sin stock por ahora"
+                  : product.stock === 1
+                    ? "Queda 1 unidad"
+                    : `${product.stock} unidades disponibles`}
               </p>
             </div>
 
@@ -159,7 +172,11 @@ function ProductPage() {
                 <ShoppingBag className="mr-2 size-5" /> Agregar al carrito
               </Button>
               <Button asChild size="lg" variant="outline" className="flex-1">
-                <a href={waLink(`Hola! Quiero consultar por ${product.name}`)} target="_blank" rel="noreferrer">
+                <a
+                  href={waLink(`Hola! Quiero consultar por ${product.name}`)}
+                  target="_blank"
+                  rel="noreferrer"
+                >
                   Consultar por WhatsApp
                 </a>
               </Button>
@@ -168,8 +185,8 @@ function ProductPage() {
             <div className="mt-6 space-y-3 rounded-2xl border border-border bg-cream p-4 text-sm">
               <p className="flex items-center gap-2">
                 <Truck className="size-4 text-primary" /> Envío en Rosario{" "}
-                {formatPrice(storeConfig.shipping.deliveryCost)} · gratis desde{" "}
-                {formatPrice(storeConfig.shipping.freeFrom)}
+                {formatPrice(storeConfig.shipping.deliveryCost)} · compra mínima{" "}
+                {formatPrice(storeConfig.shipping.minOrderForDelivery)}
               </p>
               <p className="flex items-center gap-2">
                 <Store className="size-4 text-primary" /> Retiro sin costo en {storeConfig.address}
@@ -180,7 +197,8 @@ function ProductPage() {
                 </p>
               )}
               <p className="flex items-center gap-2">
-                <Sun className="size-4 text-primary" /> Asesoramiento de cuidado incluido en cada compra.
+                <Sun className="size-4 text-primary" /> Asesoramiento de cuidado incluido en cada
+                compra.
               </p>
             </div>
           </div>
