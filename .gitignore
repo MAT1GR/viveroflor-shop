@@ -38,3 +38,6 @@ local.db-*
 
 # Vercel
 .vercel
+
+# Netlify
+.netlify
