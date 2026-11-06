@@ -1,5 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
-import { db, withWriteTransaction } from "./db";
+import { db, ensureProductVariantsColumn, withWriteTransaction } from "./db";
 import { requireAdmin } from "./session.server";
 import { priceOrder } from "./pricing-server";
 import { returnStock, takeStock } from "./stock-server";
@@ -52,6 +52,9 @@ export const saveOrderFn = createServerFn({ method: "POST" })
 
     // La columna `number` es UNIQUE: si dos pedidos caen en el mismo número,
     // el INSERT falla y reintentamos con otro.
+    // Fuera de la transacción: un ALTER TABLE adentro choca con el lock de escritura.
+    await ensureProductVariantsColumn();
+
     for (let attempt = 0; attempt < 5; attempt++) {
       const number = newOrderNumber();
 
@@ -132,6 +135,7 @@ export const updateOrderStatusFn = createServerFn({ method: "POST" })
     const items = JSON.parse(String(row["items"])) as CartItem[];
     const now = new Date().toISOString();
 
+    await ensureProductVariantsColumn();
     await withWriteTransaction(async (tx) => {
       if (data.status === "cancelado") {
         await returnStock(tx, items);

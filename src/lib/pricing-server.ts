@@ -1,4 +1,4 @@
-import { db, ensureProductVariantsColumn } from "./db";
+import { db } from "./db";
 import type { ProductVariant } from "./catalog";
 import type { CartItem } from "./cart";
 import type { ShippingMethod } from "./orders";
@@ -31,7 +31,6 @@ export async function priceOrder(
 ): Promise<PricedOrder> {
   if (items.length === 0) throw new Error("El carrito está vacío.");
 
-  await ensureProductVariantsColumn();
   const ids = [...new Set(items.map((i) => i.productId))];
   const placeholders = ids.map(() => "?").join(",");
   const result = await executor.execute({

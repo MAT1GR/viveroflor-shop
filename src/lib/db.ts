@@ -93,6 +93,7 @@ let variantsColumn: Promise<void> | null = null;
 /**
  * Bases creadas antes de que existieran los colores no tienen la columna `variants`.
  * La agregamos la primera vez que hace falta (una sola vez por proceso).
+ * Llamarla siempre FUERA de una transacción: el ALTER TABLE va por otra conexión.
  */
 export function ensureProductVariantsColumn() {
   variantsColumn ??= addColumnIfMissing("products", "variants", "TEXT").catch((error) => {
@@ -105,7 +106,12 @@ export function ensureProductVariantsColumn() {
 async function addColumnIfMissing(table: string, column: string, definition: string) {
   const info = await db.execute(`PRAGMA table_info(${table})`);
   if (info.rows.some((r) => r["name"] === column)) return;
-  await db.execute(`ALTER TABLE ${table} ADD COLUMN ${column} ${definition}`);
+  try {
+    await db.execute(`ALTER TABLE ${table} ADD COLUMN ${column} ${definition}`);
+  } catch (error) {
+    // Otra instancia del servidor la pudo haber agregado recién: no es un error.
+    if (!/duplicate column/i.test(String(error))) throw error;
+  }
 }
 
 /**

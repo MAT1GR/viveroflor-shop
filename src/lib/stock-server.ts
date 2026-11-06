@@ -1,7 +1,6 @@
 import type { Client, Transaction } from "@libsql/client";
 import type { CartItem } from "./cart";
 import type { ProductVariant } from "./catalog";
-import { ensureProductVariantsColumn } from "./db";
 
 /** Cualquier cosa que sepa ejecutar SQL: el cliente o una transacción abierta. */
 export type SqlExecutor = Pick<Client | Transaction, "execute">;
@@ -51,7 +50,6 @@ export async function returnStock(tx: SqlExecutor, items: CartItem[]) {
 
 /** Suma (o resta, con `delta` negativo) unidades al stock de un color. */
 async function moveVariantStock(tx: SqlExecutor, item: CartItem, delta: number) {
-  await ensureProductVariantsColumn();
   const found = await tx.execute({
     sql: "SELECT variants FROM products WHERE id = ?",
     args: [item.productId],
