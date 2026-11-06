@@ -12,6 +12,16 @@ export type Category = {
   emoji: string;
 };
 
+/** Un color del producto, con su propio stock y foto. */
+export type ProductVariant = {
+  id: string;
+  name: string;
+  /** Color para la muestra, en hex (#rrggbb). */
+  hex: string;
+  stock: number;
+  image: string;
+};
+
 export type Product = {
   id: string;
   name: string;
@@ -30,6 +40,8 @@ export type Product = {
   care?: string;
   features: string[];
   images: string[];
+  /** Colores. Si hay alguno, el stock del producto es la suma de los stocks de cada color. */
+  variants?: ProductVariant[];
   created_at: string;
   updated_at: string;
 };
@@ -85,6 +97,14 @@ export const getCategory = (slug: string) => categories.find((c) => c.slug === s
 export const getProduct = (slug: string) => products.find((p) => p.slug === slug && p.active);
 export const categoryName = (id: string) =>
   categories.find((c) => c.id === id)?.name ?? "Productos";
+
+/** Stock total: si el producto tiene colores, la suma de todos. */
+export const totalStock = (p: Pick<Product, "stock" | "variants">) =>
+  p.variants && p.variants.length > 0
+    ? p.variants.reduce((acc, v) => acc + Math.max(0, Number(v.stock) || 0), 0)
+    : p.stock;
+
+export const hasVariants = (p: Pick<Product, "variants">) => (p.variants?.length ?? 0) > 0;
 
 export const discountPercent = (p: Product) =>
   p.compare_price && p.compare_price > p.price

@@ -50,11 +50,7 @@ export const waLink = (message: string) =>
   `https://wa.me/${storeConfig.whatsapp}?text=${encodeURIComponent(message)}`;
 
 export const formatPrice = (value: number) =>
-  new Intl.NumberFormat("es-AR", {
-    style: "currency",
-    currency: "ARS",
-    maximumFractionDigits: 0,
-  }).format(value);
+  `$ARS ${new Intl.NumberFormat("es-AR", { maximumFractionDigits: 0 }).format(value)}`;
 
 /* ------------------------------------------------------------------ */
 /* Envío                                                               */

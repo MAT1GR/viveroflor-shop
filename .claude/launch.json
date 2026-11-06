@@ -9,6 +9,26 @@
         "dev"
       ],
       "port": 8080
+    },
+    {
+      "name": "viveroflor-dev-localdb",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": [
+        "run",
+        "dev",
+        "--",
+        "--port",
+        "8090"
+      ],
+      "env": {
+        "TURSO_URL": "",
+        "TURSO_AUTH_TOKEN": "",
+        "ADMIN_USER": "admin",
+        "ADMIN_PASSWORD": "vivero2026",
+        "ADMIN_SESSION_SECRET": "dev-secret-no-usar-en-produccion",
+        "MERCADOPAGO_ACCESS_TOKEN": ""
+      },
+      "port": 8090
     }
   ]
 }

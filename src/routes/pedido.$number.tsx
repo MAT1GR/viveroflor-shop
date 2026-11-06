@@ -11,6 +11,7 @@ import {
 import { formatPrice, storeConfig, waLink } from "@/lib/store-config";
 
 import { getOrderByNumberFn } from "@/lib/orders-server";
+import { cartKey, itemLabel } from "@/lib/cart";
 
 export const Route = createFileRoute("/pedido/$number")({
   loader: async ({ params }) => getOrderByNumberFn({ data: params.number }),
@@ -129,7 +130,7 @@ function OrderPage() {
                 <p className="font-display text-lg font-semibold">Detalle</p>
                 <ul className="mt-3 space-y-3">
                   {order.items.map((i) => (
-                    <li key={i.productId} className="flex items-center gap-3">
+                    <li key={cartKey(i)} className="flex items-center gap-3">
                       <img
                         src={i.image}
                         alt={i.name}
@@ -137,7 +138,7 @@ function OrderPage() {
                         className="size-14 rounded-lg object-cover"
                       />
                       <div className="min-w-0 flex-1">
-                        <p className="truncate text-sm font-medium">{i.name}</p>
+                        <p className="truncate text-sm font-medium">{itemLabel(i)}</p>
                         <p className="text-xs text-muted-foreground">
                           {i.quantity} × {formatPrice(i.price)}
                         </p>

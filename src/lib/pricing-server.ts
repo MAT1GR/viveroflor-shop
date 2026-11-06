@@ -1,7 +1,14 @@
-import { db } from "./db";
+import { db, ensureProductVariantsColumn } from "./db";
+import type { ProductVariant } from "./catalog";
 import type { CartItem } from "./cart";
 import type { ShippingMethod } from "./orders";
-import { canDeliver, promoDiscountFor, shippingCostFor, storeConfig } from "./store-config";
+import {
+  canDeliver,
+  formatPrice,
+  promoDiscountFor,
+  shippingCostFor,
+  storeConfig,
+} from "./store-config";
 
 export type PricedOrder = {
   items: CartItem[];
@@ -24,10 +31,11 @@ export async function priceOrder(
 ): Promise<PricedOrder> {
   if (items.length === 0) throw new Error("El carrito está vacío.");
 
+  await ensureProductVariantsColumn();
   const ids = [...new Set(items.map((i) => i.productId))];
   const placeholders = ids.map(() => "?").join(",");
   const result = await executor.execute({
-    sql: `SELECT id, name, slug, price, stock, active, images FROM products WHERE id IN (${placeholders})`,
+    sql: `SELECT id, name, slug, price, stock, active, images, variants FROM products WHERE id IN (${placeholders})`,
     args: ids,
   });
 
@@ -38,10 +46,22 @@ export async function priceOrder(
     if (!row) throw new Error(`El producto "${item.name}" ya no está disponible.`);
     if (!row["active"]) throw new Error(`El producto "${row["name"]}" ya no está a la venta.`);
 
-    const stock = Number(row["stock"]);
+    const variants = row["variants"]
+      ? (JSON.parse(String(row["variants"])) as ProductVariant[])
+      : [];
+    let variant: ProductVariant | undefined;
+    if (variants.length > 0) {
+      variant = variants.find((v) => v.id === item.variantId);
+      if (!variant) {
+        throw new Error(`Elegí un color disponible para "${row["name"]}".`);
+      }
+    }
+
+    const label = variant ? `${row["name"]} (${variant.name})` : String(row["name"]);
+    const stock = variant ? Number(variant.stock) : Number(row["stock"]);
     const quantity = Math.max(1, Math.floor(item.quantity));
     if (quantity > stock) {
-      throw new Error(`No hay stock suficiente de "${row["name"]}". Quedan ${stock}.`);
+      throw new Error(`No hay stock suficiente de "${label}". Quedan ${stock}.`);
     }
 
     const images = row["images"] ? (JSON.parse(String(row["images"])) as string[]) : [];
@@ -50,9 +70,10 @@ export async function priceOrder(
       slug: String(row["slug"]),
       name: String(row["name"]),
       price: Number(row["price"]),
-      image: images[0] ?? "",
+      image: variant?.image || images[0] || variants.find((v) => v.image)?.image || "",
       stock,
       quantity,
+      ...(variant ? { variantId: variant.id, variantName: variant.name } : {}),
     };
   });
 
@@ -60,7 +81,7 @@ export async function priceOrder(
 
   if (shippingMethod === "delivery" && !canDeliver(subtotal)) {
     throw new Error(
-      `El envío requiere una compra mínima de $${storeConfig.shipping.minOrderForDelivery}.`,
+      `El envío requiere una compra mínima de ${formatPrice(storeConfig.shipping.minOrderForDelivery)}.`,
     );
   }
 

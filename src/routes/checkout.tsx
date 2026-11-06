@@ -31,6 +31,7 @@ import {
 import type { Order, ShippingMethod } from "@/lib/orders";
 import { saveOrderFn } from "@/lib/orders-server";
 import { buildOrderWhatsAppMessage, paymentMethods, type PaymentMethodId } from "@/lib/payments";
+import { cartKey, itemLabel } from "@/lib/cart";
 
 export const Route = createFileRoute("/checkout")({
   head: () => ({
@@ -402,7 +403,7 @@ function CheckoutPage() {
           <h2 className="font-display text-lg font-semibold">Tu pedido</h2>
           <ul className="space-y-3">
             {items.map((i) => (
-              <li key={i.productId} className="flex items-center gap-3">
+              <li key={cartKey(i)} className="flex items-center gap-3">
                 <img
                   src={i.image}
                   alt={i.name}
@@ -410,7 +411,7 @@ function CheckoutPage() {
                   className="size-14 rounded-lg object-cover"
                 />
                 <div className="min-w-0 flex-1">
-                  <p className="truncate text-sm font-medium">{i.name}</p>
+                  <p className="truncate text-sm font-medium">{itemLabel(i)}</p>
                   <p className="text-xs text-muted-foreground">
                     {i.quantity} × {formatPrice(i.price)}
                   </p>

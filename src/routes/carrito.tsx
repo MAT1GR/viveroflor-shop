@@ -10,6 +10,7 @@ import {
   shippingCostFor,
   storeConfig,
 } from "@/lib/store-config";
+import { cartKey, itemLabel } from "@/lib/cart";
 
 export const Route = createFileRoute("/carrito")({
   head: () => ({
@@ -66,13 +67,13 @@ function CartPage() {
             <ul className="space-y-4">
               {items.map((item) => (
                 <li
-                  key={item.productId}
+                  key={cartKey(item)}
                   className="flex gap-4 rounded-2xl border border-border bg-card p-4 shadow-soft"
                 >
                   <Link to="/producto/$slug" params={{ slug: item.slug }} className="shrink-0">
                     <img
                       src={item.image}
-                      alt={item.name}
+                      alt={itemLabel(item)}
                       loading="lazy"
                       className="size-24 rounded-xl object-cover md:size-28"
                     />
@@ -84,11 +85,11 @@ function CartPage() {
                         params={{ slug: item.slug }}
                         className="font-medium hover:text-primary"
                       >
-                        {item.name}
+                        {itemLabel(item)}
                       </Link>
                       <button
-                        onClick={() => remove(item.productId)}
-                        aria-label={`Eliminar ${item.name}`}
+                        onClick={() => remove(cartKey(item))}
+                        aria-label={`Eliminar ${itemLabel(item)}`}
                         className="text-muted-foreground transition-colors hover:text-destructive"
                       >
                         <Trash2 className="size-4" />
@@ -102,7 +103,7 @@ function CartPage() {
                         <button
                           className="flex size-10 items-center justify-center rounded-full hover:bg-secondary"
                           aria-label="Restar unidad"
-                          onClick={() => setQuantity(item.productId, item.quantity - 1)}
+                          onClick={() => setQuantity(cartKey(item), item.quantity - 1)}
                         >
                           <Minus className="size-4" />
                         </button>
@@ -111,7 +112,7 @@ function CartPage() {
                           className="flex size-10 items-center justify-center rounded-full hover:bg-secondary disabled:opacity-40"
                           aria-label="Sumar unidad"
                           disabled={item.quantity >= item.stock}
-                          onClick={() => setQuantity(item.productId, item.quantity + 1)}
+                          onClick={() => setQuantity(cartKey(item), item.quantity + 1)}
                         >
                           <Plus className="size-4" />
                         </button>

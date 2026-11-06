@@ -8,7 +8,7 @@ import {
   type ReactNode,
 } from "react";
 import { toast } from "sonner";
-import type { Product } from "./catalog";
+import type { Product, ProductVariant } from "./catalog";
 
 export type CartItem = {
   productId: string;
@@ -18,7 +18,18 @@ export type CartItem = {
   image: string;
   stock: number;
   quantity: number;
+  /** Color elegido, si el producto tiene colores. */
+  variantId?: string;
+  variantName?: string;
 };
+
+/** Identifica una línea del carrito: el mismo producto en dos colores son dos líneas. */
+export const cartKey = (item: { productId: string; variantId?: string | undefined }) =>
+  item.variantId ? `${item.productId}::${item.variantId}` : item.productId;
+
+/** Nombre para mostrar: "Maceta Cerámica (Rojo)". */
+export const itemLabel = (item: Pick<CartItem, "name" | "variantName">) =>
+  item.variantName ? `${item.name} (${item.variantName})` : item.name;
 
 type CartContextValue = {
   items: CartItem[];
@@ -27,9 +38,14 @@ type CartContextValue = {
   isOpen: boolean;
   openCart: () => void;
   closeCart: () => void;
-  add: (product: Product, quantity?: number, options?: { silent?: boolean }) => void;
-  remove: (productId: string) => void;
-  setQuantity: (productId: string, quantity: number) => void;
+  add: (
+    product: Product,
+    quantity?: number,
+    options?: { silent?: boolean; variant?: ProductVariant | undefined },
+  ) => void;
+  /** Recibe la clave de la línea (`cartKey(item)`). */
+  remove: (key: string) => void;
+  setQuantity: (key: string, quantity: number) => void;
   clear: () => void;
 };
 
@@ -56,48 +72,64 @@ export function CartProvider({ children }: { children: ReactNode }) {
     window.localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
   }, [items, hydrated]);
 
-  const add = useCallback((product: Product, quantity = 1, options?: { silent?: boolean }) => {
-    if (product.stock <= 0) {
-      toast.error("Sin stock", { description: `${product.name} no está disponible por ahora.` });
-      return;
-    }
-    setItems((prev) => {
-      const existing = prev.find((i) => i.productId === product.id);
-      if (existing) {
-        const next = Math.min(existing.quantity + quantity, product.stock);
-        if (next === existing.quantity) {
-          toast.info("Alcanzaste el stock disponible", {
-            description: `Quedan ${product.stock} unidades de ${product.name}.`,
-          });
-        }
-        return prev.map((i) => (i.productId === product.id ? { ...i, quantity: next } : i));
+  const add = useCallback(
+    (
+      product: Product,
+      quantity = 1,
+      options?: { silent?: boolean; variant?: ProductVariant | undefined },
+    ) => {
+      const variant = options?.variant;
+      const label = variant ? `${product.name} (${variant.name})` : product.name;
+      const stock = variant ? variant.stock : product.stock;
+      if (stock <= 0) {
+        toast.error("Sin stock", { description: `${label} no está disponible por ahora.` });
+        return;
       }
-      return [
-        ...prev,
-        {
-          productId: product.id,
-          slug: product.slug,
-          name: product.name,
-          price: product.price,
-          image: product.images[0] ?? "",
-          stock: product.stock,
-          quantity: Math.min(quantity, product.stock),
-        },
-      ];
-    });
-    if (!options?.silent) {
-      toast.success("Agregado al carrito", { description: product.name });
-    }
+      const key = cartKey({ productId: product.id, variantId: variant?.id });
+      setItems((prev) => {
+        const existing = prev.find((i) => cartKey(i) === key);
+        if (existing) {
+          const next = Math.min(existing.quantity + quantity, stock);
+          if (next === existing.quantity) {
+            toast.info("Alcanzaste el stock disponible", {
+              description: `Quedan ${stock} unidades de ${label}.`,
+            });
+          }
+          return prev.map((i) => (cartKey(i) === key ? { ...i, quantity: next, stock } : i));
+        }
+        return [
+          ...prev,
+          {
+            productId: product.id,
+            slug: product.slug,
+            name: product.name,
+            price: product.price,
+            image:
+              variant?.image ||
+              product.images[0] ||
+              product.variants?.find((v) => v.image)?.image ||
+              "",
+            stock,
+            quantity: Math.min(quantity, stock),
+            ...(variant ? { variantId: variant.id, variantName: variant.name } : {}),
+          },
+        ];
+      });
+      if (!options?.silent) {
+        toast.success("Agregado al carrito", { description: label });
+      }
+    },
+    [],
+  );
+
+  const remove = useCallback((key: string) => {
+    setItems((prev) => prev.filter((i) => cartKey(i) !== key));
   }, []);
 
-  const remove = useCallback((productId: string) => {
-    setItems((prev) => prev.filter((i) => i.productId !== productId));
-  }, []);
-
-  const setQuantity = useCallback((productId: string, quantity: number) => {
+  const setQuantity = useCallback((key: string, quantity: number) => {
     setItems((prev) =>
       prev.flatMap((i) => {
-        if (i.productId !== productId) return [i];
+        if (cartKey(i) !== key) return [i];
         const next = Math.max(0, Math.min(quantity, i.stock));
         return next === 0 ? [] : [{ ...i, quantity: next }];
       }),

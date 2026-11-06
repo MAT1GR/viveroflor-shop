@@ -12,6 +12,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { cartKey, itemLabel } from "@/lib/cart";
 
 export const Route = createFileRoute("/admin/pedidos")({
   loader: () => getOrdersFn(),
@@ -204,9 +205,9 @@ function OrderDetail({ order }: { order: Order }) {
         <p className="text-xs font-semibold uppercase text-muted-foreground">Productos</p>
         <ul className="mt-3 space-y-2 text-sm">
           {order.items.map((item) => (
-            <li key={item.productId} className="flex justify-between gap-3">
+            <li key={cartKey(item)} className="flex justify-between gap-3">
               <span>
-                {item.quantity} × {item.name}
+                {item.quantity} × {itemLabel(item)}
               </span>
               <span className="font-medium">{formatPrice(item.price * item.quantity)}</span>
             </li>

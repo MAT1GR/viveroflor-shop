@@ -2,7 +2,7 @@ import { Link } from "@tanstack/react-router";
 import { ShoppingBag } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useCart } from "@/lib/cart";
-import { categoryName, discountPercent, type Product } from "@/lib/catalog";
+import { categoryName, discountPercent, hasVariants, type Product } from "@/lib/catalog";
 import { formatPrice } from "@/lib/store-config";
 
 export function ProductCard({ product }: { product: Product }) {
@@ -18,7 +18,7 @@ export function ProductCard({ product }: { product: Product }) {
         className="relative block overflow-hidden bg-beige/50"
       >
         <img
-          src={product.images[0]}
+          src={product.images[0] || product.variants?.find((v) => v.image)?.image}
           alt={product.name}
           loading="lazy"
           width={900}
@@ -78,15 +78,33 @@ export function ProductCard({ product }: { product: Product }) {
               : "Disponible"}
         </p>
 
-        <Button
-          className="mt-4 w-full"
-          disabled={outOfStock}
-          onClick={() => add(product)}
-          aria-label={`Agregar ${product.name} al carrito`}
-        >
-          <ShoppingBag className="size-4" />
-          {outOfStock ? "Sin stock" : "Agregar al carrito"}
-        </Button>
+        {hasVariants(product) && !outOfStock ? (
+          // Con colores hay que elegir uno: lo mandamos a la ficha del producto.
+          <Button asChild className="mt-4 w-full">
+            <Link to="/producto/$slug" params={{ slug: product.slug }}>
+              <span className="flex gap-1">
+                {product.variants!.slice(0, 4).map((v) => (
+                  <span
+                    key={v.id}
+                    className="size-3 rounded-full border border-background"
+                    style={{ backgroundColor: v.hex }}
+                  />
+                ))}
+              </span>
+              Elegir color
+            </Link>
+          </Button>
+        ) : (
+          <Button
+            className="mt-4 w-full"
+            disabled={outOfStock}
+            onClick={() => add(product)}
+            aria-label={`Agregar ${product.name} al carrito`}
+          >
+            <ShoppingBag className="size-4" />
+            {outOfStock ? "Sin stock" : "Agregar al carrito"}
+          </Button>
+        )}
       </div>
     </article>
   );

@@ -55,8 +55,28 @@ function ProductPage() {
   const { add, openCart } = useCart();
   const [qty, setQty] = useState(1);
   const [active, setActive] = useState(0);
+  const variants = product.variants ?? [];
+  const [variantId, setVariantId] = useState<string | undefined>(
+    () => (variants.find((v) => v.stock > 0) ?? variants[0])?.id,
+  );
+  const variant = variants.find((v) => v.id === variantId);
+  // Al elegir un color mostramos su foto; si el cliente toca una miniatura, manda la miniatura.
+  const [showVariantImage, setShowVariantImage] = useState(true);
+  const mainImage =
+    (showVariantImage && variant?.image) ||
+    product.images[active] ||
+    variant?.image ||
+    variants.find((v) => v.image)?.image;
+  const stock = variant ? variant.stock : product.stock;
   const off = discountPercent(product);
-  const outOfStock = product.stock <= 0;
+  const outOfStock = stock <= 0;
+
+  const chooseVariant = (id: string) => {
+    setVariantId(id);
+    setShowVariantImage(true);
+    const next = variants.find((v) => v.id === id);
+    setQty((q) => Math.max(1, Math.min(q, next?.stock ?? 1)));
+  };
 
   return (
     <SiteShell>
@@ -77,7 +97,7 @@ function ProductPage() {
           <div>
             <div className="overflow-hidden rounded-3xl border border-border bg-beige/40">
               <img
-                src={product.images[active]}
+                src={mainImage}
                 alt={product.name}
                 width={1000}
                 height={1000}
@@ -89,9 +109,12 @@ function ProductPage() {
                 {product.images.map((img, i) => (
                   <button
                     key={img}
-                    onClick={() => setActive(i)}
+                    onClick={() => {
+                      setActive(i);
+                      setShowVariantImage(false);
+                    }}
                     aria-label={`Ver imagen ${i + 1}`}
-                    className={`overflow-hidden rounded-xl border-2 ${i === active ? "border-primary" : "border-border"}`}
+                    className={`overflow-hidden rounded-xl border-2 ${i === active && !(showVariantImage && variant?.image) ? "border-primary" : "border-border"}`}
                   >
                     <img src={img} alt="" className="size-20 object-cover" loading="lazy" />
                   </button>
@@ -131,6 +154,44 @@ function ProductPage() {
               ))}
             </ul>
 
+            {variants.length > 0 && (
+              <div className="mt-6">
+                <p className="text-sm font-semibold">
+                  Color: <span className="font-normal text-muted-foreground">{variant?.name}</span>
+                </p>
+                <div className="mt-2 flex flex-wrap gap-2" role="radiogroup" aria-label="Color">
+                  {variants.map((v) => {
+                    const selected = v.id === variantId;
+                    return (
+                      <button
+                        key={v.id}
+                        type="button"
+                        role="radio"
+                        aria-checked={selected}
+                        onClick={() => chooseVariant(v.id)}
+                        className={`flex items-center gap-2 rounded-full border-2 py-1 pl-1 pr-3 text-sm transition-colors ${
+                          selected
+                            ? "border-primary bg-secondary"
+                            : "border-border hover:border-primary/50"
+                        } ${v.stock <= 0 ? "opacity-50" : ""}`}
+                      >
+                        {v.image ? (
+                          <img src={v.image} alt="" className="size-7 rounded-full object-cover" />
+                        ) : (
+                          <span
+                            className="size-7 rounded-full border border-border"
+                            style={{ backgroundColor: v.hex }}
+                          />
+                        )}
+                        {v.name}
+                        {v.stock <= 0 && <span className="text-xs">(sin stock)</span>}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
             <div className="mt-6 flex flex-wrap items-center gap-4">
               <div className="flex items-center rounded-full border border-border">
                 <button
@@ -144,8 +205,8 @@ function ProductPage() {
                 <button
                   className="flex size-11 items-center justify-center rounded-full hover:bg-secondary disabled:opacity-40"
                   aria-label="Sumar unidad"
-                  disabled={qty >= product.stock}
-                  onClick={() => setQty((q) => Math.min(product.stock, q + 1))}
+                  disabled={qty >= stock}
+                  onClick={() => setQty((q) => Math.min(stock, q + 1))}
                 >
                   <Plus className="size-4" />
                 </button>
@@ -153,9 +214,9 @@ function ProductPage() {
               <p className="text-sm text-muted-foreground">
                 {outOfStock
                   ? "Sin stock por ahora"
-                  : product.stock === 1
+                  : stock === 1
                     ? "Queda 1 unidad"
-                    : `${product.stock} unidades disponibles`}
+                    : `${stock} unidades disponibles`}
               </p>
             </div>
 
@@ -165,7 +226,7 @@ function ProductPage() {
                 className="flex-1"
                 disabled={outOfStock}
                 onClick={() => {
-                  add(product, qty);
+                  add(product, qty, { variant });
                   openCart();
                 }}
               >

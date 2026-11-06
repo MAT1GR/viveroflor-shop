@@ -9,6 +9,7 @@
 import type { CartItem } from "./cart";
 import type { Order, ShippingMethod } from "./orders";
 import { formatPrice, storeConfig } from "./store-config";
+import { itemLabel } from "./cart";
 
 export type PaymentMethodId = "whatsapp" | "efectivo_local";
 
@@ -74,7 +75,8 @@ export function buildOrderWhatsAppMessage(order: OrderMessageInput) {
     "",
     "*Productos*",
     ...order.items.map(
-      (item) => `• ${item.quantity} × ${item.name} — ${formatPrice(item.price * item.quantity)}`,
+      (item) =>
+        `• ${item.quantity} × ${itemLabel(item)} — ${formatPrice(item.price * item.quantity)}`,
     ),
     "",
     `*Entrega:* ${

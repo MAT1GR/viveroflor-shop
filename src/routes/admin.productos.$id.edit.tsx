@@ -4,11 +4,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { TagInput } from "@/components/admin/TagInput";
+import { VariantsEditor } from "@/components/admin/VariantsEditor";
 import { uploadImageFn } from "@/lib/upload-server";
 import { saveProductFn, getProductFn, deleteProductFn } from "@/lib/catalog-server";
 import imageCompression from "browser-image-compression";
 import { ArrowLeft, Loader2, Trash2, Upload, X } from "lucide-react";
-import type { Product } from "@/lib/catalog";
+import { totalStock, type Product } from "@/lib/catalog";
 
 export const Route = createFileRoute("/admin/productos/$id/edit")({
   loader: async ({ params }) => {
@@ -108,16 +110,6 @@ function EditarProducto() {
       setForm((f) => ({ ...f, [k]: val }));
     };
 
-  const setArray =
-    (k: "features" | "images") =>
-    (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-      const arr = e.target.value
-        .split(",")
-        .map((s: string) => s.trim())
-        .filter(Boolean);
-      setForm((f) => ({ ...f, [k]: arr }));
-    };
-
   return (
     <div className="max-w-4xl space-y-6">
       <div className="flex items-center gap-4">
@@ -148,20 +140,48 @@ function EditarProducto() {
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label>Precio</Label>
-                <Input required type="number" value={form.price} onChange={set("price")} />
+                <div className="relative">
+                  <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">
+                    $ARS
+                  </span>
+                  <Input
+                    required
+                    type="number"
+                    min={0}
+                    className="pl-14"
+                    value={form.price}
+                    onChange={set("price")}
+                  />
+                </div>
               </div>
               <div className="space-y-2">
                 <Label>Precio Anterior (Opcional)</Label>
-                <Input
-                  type="number"
-                  value={form.compare_price || ""}
-                  onChange={set("compare_price")}
-                />
+                <div className="relative">
+                  <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">
+                    $ARS
+                  </span>
+                  <Input
+                    type="number"
+                    min={0}
+                    className="pl-14"
+                    value={form.compare_price || ""}
+                    onChange={set("compare_price")}
+                  />
+                </div>
               </div>
             </div>
             <div className="space-y-2">
               <Label>Stock</Label>
-              <Input required type="number" value={form.stock} onChange={set("stock")} />
+              {form.variants && form.variants.length > 0 ? (
+                <>
+                  <Input type="number" value={totalStock(form as Product)} disabled />
+                  <p className="text-xs text-muted-foreground">
+                    Es la suma de las cantidades de cada color.
+                  </p>
+                </>
+              ) : (
+                <Input required type="number" min={0} value={form.stock} onChange={set("stock")} />
+              )}
             </div>
             <div className="space-y-2">
               <Label>Tamaño / Medidas</Label>
@@ -192,11 +212,11 @@ function EditarProducto() {
               />
             </div>
             <div className="space-y-2">
-              <Label>Características (separadas por coma)</Label>
-              <Input
-                value={form.features?.join(", ") || ""}
-                onChange={setArray("features")}
-                placeholder="Apta interior, Bajo mantenimiento"
+              <Label>Características</Label>
+              <TagInput
+                value={form.features ?? []}
+                onChange={(features) => setForm((f) => ({ ...f, features }))}
+                placeholder="Ej: Apta interior"
               />
             </div>
             <div className="space-y-2">
@@ -237,6 +257,14 @@ function EditarProducto() {
                 </Button>
               </div>
             </div>
+          </div>
+
+          <div className="sm:col-span-2 border-t pt-4">
+            <Label className="mb-3 block text-base">Colores</Label>
+            <VariantsEditor
+              value={form.variants ?? []}
+              onChange={(variants) => setForm((f) => ({ ...f, variants }))}
+            />
           </div>
 
           <div className="sm:col-span-2 border-t pt-4">

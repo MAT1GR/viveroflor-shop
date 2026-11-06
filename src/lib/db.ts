@@ -13,9 +13,14 @@ const createClient: typeof createWebClient = process.env["TURSO_URL"]
 const url = process.env["TURSO_URL"] || "file:local.db";
 const authToken = process.env["TURSO_AUTH_TOKEN"];
 
-if (!process.env["TURSO_URL"] && (process.env["VERCEL"] || process.env["NODE_ENV"] === "production")) {
+if (
+  !process.env["TURSO_URL"] &&
+  (process.env["VERCEL"] || process.env["NODE_ENV"] === "production")
+) {
   // En Vercel/Cloudflare el disco es de solo lectura: local.db no existe y todas las consultas fallan.
-  console.error("[db] Falta TURSO_URL: configurá TURSO_URL y TURSO_AUTH_TOKEN en el entorno de producción.");
+  console.error(
+    "[db] Falta TURSO_URL: configurá TURSO_URL y TURSO_AUTH_TOKEN en el entorno de producción.",
+  );
 }
 
 export const db = createClient(authToken ? { url, authToken } : { url });
@@ -81,6 +86,20 @@ export async function initDb() {
   // Migraciones incrementales para bases creadas antes de que existieran las columnas.
   await addColumnIfMissing("orders", "discount", "REAL NOT NULL DEFAULT 0");
   await addColumnIfMissing("orders", "notes", "TEXT");
+  await addColumnIfMissing("products", "variants", "TEXT");
+}
+
+let variantsColumn: Promise<void> | null = null;
+/**
+ * Bases creadas antes de que existieran los colores no tienen la columna `variants`.
+ * La agregamos la primera vez que hace falta (una sola vez por proceso).
+ */
+export function ensureProductVariantsColumn() {
+  variantsColumn ??= addColumnIfMissing("products", "variants", "TEXT").catch((error) => {
+    variantsColumn = null;
+    throw error;
+  });
+  return variantsColumn;
 }
 
 async function addColumnIfMissing(table: string, column: string, definition: string) {

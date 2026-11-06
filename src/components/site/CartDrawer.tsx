@@ -10,6 +10,7 @@ import {
   shippingCostFor,
   storeConfig,
 } from "@/lib/store-config";
+import { cartKey, itemLabel } from "@/lib/cart";
 
 export function CartDrawer() {
   const { isOpen, closeCart, items, subtotal, setQuantity, remove, count } = useCart();
@@ -43,11 +44,11 @@ export function CartDrawer() {
             <div className="flex-1 overflow-y-auto px-5 py-4">
               <ul className="space-y-4">
                 {items.map((item) => (
-                  <li key={item.productId} className="flex gap-3">
+                  <li key={cartKey(item)} className="flex gap-3">
                     <Link to="/producto/$slug" params={{ slug: item.slug }} onClick={closeCart}>
                       <img
                         src={item.image}
-                        alt={item.name}
+                        alt={itemLabel(item)}
                         loading="lazy"
                         className="size-20 rounded-xl border border-border object-cover"
                       />
@@ -60,11 +61,11 @@ export function CartDrawer() {
                           onClick={closeCart}
                           className="text-sm font-medium hover:text-primary"
                         >
-                          {item.name}
+                          {itemLabel(item)}
                         </Link>
                         <button
-                          onClick={() => remove(item.productId)}
-                          aria-label={`Eliminar ${item.name}`}
+                          onClick={() => remove(cartKey(item))}
+                          aria-label={`Eliminar ${itemLabel(item)}`}
                           className="text-muted-foreground transition-colors hover:text-destructive"
                         >
                           <Trash2 className="size-4" />
@@ -78,7 +79,7 @@ export function CartDrawer() {
                           <button
                             className="flex size-9 items-center justify-center rounded-full hover:bg-secondary"
                             aria-label="Restar unidad"
-                            onClick={() => setQuantity(item.productId, item.quantity - 1)}
+                            onClick={() => setQuantity(cartKey(item), item.quantity - 1)}
                           >
                             <Minus className="size-4" />
                           </button>
@@ -89,7 +90,7 @@ export function CartDrawer() {
                             className="flex size-9 items-center justify-center rounded-full hover:bg-secondary disabled:opacity-40"
                             aria-label="Sumar unidad"
                             disabled={item.quantity >= item.stock}
-                            onClick={() => setQuantity(item.productId, item.quantity + 1)}
+                            onClick={() => setQuantity(cartKey(item), item.quantity + 1)}
                           >
                             <Plus className="size-4" />
                           </button>
